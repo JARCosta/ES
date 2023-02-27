@@ -1,0 +1,112 @@
+package pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.domain;
+
+import pt.ulisboa.tecnico.socialsoftware.tutor.execution.domain.CourseExecution;
+import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.DomainEntity;
+import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.Visitor;
+
+import javax.persistence.*;
+
+public class StudentStats implements DomainEntity {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    private Integer numStudents;
+
+    private Integer numMore75CorrectQuestions;
+
+    private Integer numAtLeast3Quizes;
+
+    @ManyToOne
+    private TeacherDashboard teacherDashboard;
+
+    @ManyToOne
+    private CourseExecution courseExecution;
+
+    public StudentStats() {
+    }
+
+    public StudentStats(Integer numStudents, Integer numMore75CorrectQuestions, Integer numAtLeast3Quizes, TeacherDashboard teacherDashboard, CourseExecution courseExecution) {
+        // if(0 students over this and the last 2 years?)
+        //     CANNOT_CREATE_STUDENT_STATS
+
+        setNumStudents(numStudents);
+        setNumMore75CorrectQuestions(numMore75CorrectQuestions);
+        setNumAtLeast3Quizes(numAtLeast3Quizes);
+        setTeacherDashboard(teacherDashboard);
+        setCourseExecution(courseExecution);
+    }
+
+    public void remove() {
+        courseExecution.getStudentStats().remove(this);
+        courseExecution = null;
+    }
+
+    public CourseExecution getCourseExecution(){
+        return courseExecution;
+    }
+    
+    public void setCourseExecution(CourseExecution courseExecution) {
+        this.courseExecution = courseExecution;
+        this.courseExecution.addStudentStats(this);
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public Integer getNumStudents(){
+        return numStudents;
+    }
+
+    public void setNumStudents(Integer numStudents){
+        this.numStudents = numStudents;
+    }
+    
+    public Integer getNumMore75CorrectQuestions(){
+        return numMore75CorrectQuestions;
+    }
+
+    public void setNumMore75CorrectQuestions(Integer numMore75CorrectQuestions){
+        this.numMore75CorrectQuestions = numMore75CorrectQuestions;
+    }
+    
+    public Integer getNumAtLeast3Quizes(){
+        return numAtLeast3Quizes;
+    }
+
+    public void setNumAtLeast3Quizes(Integer numAtLeast3Quizes){
+        this.numAtLeast3Quizes = numAtLeast3Quizes;
+    }
+
+    public TeacherDashboard getTeacherDashboard(){
+        return teacherDashboard;
+    }
+
+    public void setTeacherDashboard(TeacherDashboard teacherDashboard){
+        this.teacherDashboard = teacherDashboard;
+    }
+
+    public void update(){
+        // this.setPercentage(this.getQuestion().getDifficulty());
+        this.setNumStudents(this.getCourseExecution().getNumberOfActiveStudents());
+        // this.setNumMore75CorrectQuestions(this.getCourseExecution().getNumberOfStudentsWithMore75CorrectQuestions());
+    }
+
+    @Override
+    public void accept(Visitor visitor) {
+        // Only used for XML generation
+    }
+
+    @Override
+    public String toString() {
+        return "StudentStats{" +
+                "id=" + id +
+                ", numStudents=" + numStudents +
+                ", numMore75CorrectQuestions=" + numMore75CorrectQuestions +
+                ", numAtLeast3Quizes=" + numAtLeast3Quizes +
+                "}";
+    }
+
+}

@@ -7,6 +7,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.user.domain.Teacher;
 
 import javax.persistence.*;
 
+import java.util.List;
 
 @Entity
 public class TeacherDashboard implements DomainEntity {
@@ -20,6 +21,9 @@ public class TeacherDashboard implements DomainEntity {
 
     @ManyToOne
     private Teacher teacher;
+
+    @ManyToOne
+    private List<StudentStats> StudentStats;
 
     public TeacherDashboard() {
     }

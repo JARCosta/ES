@@ -1,5 +1,6 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.execution.domain;
 
+import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.domain.StudentStats;
 import pt.ulisboa.tecnico.socialsoftware.tutor.studentdashboard.domain.DifficultQuestion;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Discussion;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage;
@@ -51,6 +52,10 @@ public class CourseExecution implements DomainEntity {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "courseExecution", orphanRemoval = true)
     private final Set<DifficultQuestion> difficultQuestions = new HashSet<>();
 
+    // @OneToMany(cascade = CascadeType.ALL, mappedBy = "courseExecution", orphanRemoval = true)
+    private final Set<StudentStats> studentStats = new HashSet<>();
+
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -212,6 +217,14 @@ public class CourseExecution implements DomainEntity {
             throw new TutorException(ErrorMessage.DIFFICULT_QUESTION_ALREADY_CREATED);
         }
         difficultQuestions.add(difficultQuestion);
+    }
+
+    public Set<StudentStats> getStudentStats(){
+        return studentStats;
+    }
+
+    public void addStudentStats(StudentStats studentStat){
+        studentStats.add(studentStat);
     }
 
     @Override

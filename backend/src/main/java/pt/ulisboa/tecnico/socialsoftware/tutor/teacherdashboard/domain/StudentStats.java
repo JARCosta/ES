@@ -6,10 +6,11 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.Visitor;
 
 import javax.persistence.*;
 
+@Entity
 public class StudentStats implements DomainEntity {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Integer id;
 
     private Integer numStudents;
@@ -21,16 +22,16 @@ public class StudentStats implements DomainEntity {
     @ManyToOne
     private TeacherDashboard teacherDashboard;
 
-    @ManyToOne
+    @OneToOne
     private CourseExecution courseExecution;
 
     public StudentStats() {
     }
 
-    public StudentStats(Integer numStudents, Integer numMore75CorrectQuestions, Integer numAtLeast3Quizes, TeacherDashboard teacherDashboard, CourseExecution courseExecution) {
+    public StudentStats(Integer id, Integer numStudents, Integer numMore75CorrectQuestions, Integer numAtLeast3Quizes, TeacherDashboard teacherDashboard, CourseExecution courseExecution) {
         // if(0 students over this and the last 2 years?)
         //     CANNOT_CREATE_STUDENT_STATS
-
+        setId(id);
         setNumStudents(numStudents);
         setNumMore75CorrectQuestions(numMore75CorrectQuestions);
         setNumAtLeast3Quizes(numAtLeast3Quizes);
@@ -39,8 +40,8 @@ public class StudentStats implements DomainEntity {
     }
 
     public void remove() {
-        courseExecution.getStudentStats().remove(this);
-        courseExecution = null;
+        // courseExecution.getStudentStats().remove(this);
+        // courseExecution = null;
     }
 
     public CourseExecution getCourseExecution(){
@@ -49,11 +50,15 @@ public class StudentStats implements DomainEntity {
     
     public void setCourseExecution(CourseExecution courseExecution) {
         this.courseExecution = courseExecution;
-        this.courseExecution.addStudentStats(this);
+        // this.courseExecution.addStudentStats(this);
     }
-
+    
     public Integer getId() {
         return id;
+    }
+
+    public void setId(Integer id){
+        this.id = id;
     }
 
     public Integer getNumStudents(){
@@ -90,7 +95,7 @@ public class StudentStats implements DomainEntity {
 
     public void update(){
         // this.setPercentage(this.getQuestion().getDifficulty());
-        this.setNumStudents(this.getCourseExecution().getNumberOfActiveStudents());
+        // this.setNumStudents(this.getCourseExecution().getNumberOfActiveStudents());
         // this.setNumMore75CorrectQuestions(this.getCourseExecution().getNumberOfStudentsWithMore75CorrectQuestions());
     }
 

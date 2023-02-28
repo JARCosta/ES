@@ -5,9 +5,11 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.DomainEntity;
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.Visitor;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.domain.Teacher;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.*;
 
-import java.util.List;
 
 @Entity
 public class TeacherDashboard implements DomainEntity {
@@ -22,8 +24,8 @@ public class TeacherDashboard implements DomainEntity {
     @ManyToOne
     private Teacher teacher;
 
-    @ManyToOne
-    private List<StudentStats> StudentStats;
+    @OneToMany
+    private List<StudentStats> studentStats = new ArrayList<>();
 
     public TeacherDashboard() {
     }

@@ -53,8 +53,8 @@ public class CourseExecution implements DomainEntity {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "courseExecution", orphanRemoval = true)
     private final Set<DifficultQuestion> difficultQuestions = new HashSet<>();
     
-    @OneToOne
-    private final StudentStats studentStats = new StudentStats();
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "courseExecution", orphanRemoval = true)
+    private StudentStats studentStats = new StudentStats();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "courseExecution", orphanRemoval = true)
     private final Set<TeacherDashboard> teacherDashboards = new HashSet<>();

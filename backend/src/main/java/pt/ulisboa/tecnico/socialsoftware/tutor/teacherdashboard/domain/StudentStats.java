@@ -1,8 +1,10 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.domain;
 
+import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuizAnswer;
 import pt.ulisboa.tecnico.socialsoftware.tutor.execution.domain.CourseExecution;
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.DomainEntity;
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.Visitor;
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.domain.Student;
 
 import javax.persistence.*;
 
@@ -94,9 +96,21 @@ public class StudentStats implements DomainEntity {
     }
 
     public void update(){
-        // this.setPercentage(this.getQuestion().getDifficulty());
-        // this.setNumStudents(this.getCourseExecution().getNumberOfActiveStudents());
-        // this.setNumMore75CorrectQuestions(this.getCourseExecution().getNumberOfStudentsWithMore75CorrectQuestions());
+        this.setNumStudents(this.getCourseExecution().getNumberOfActiveStudents());
+        
+        this.setNumMore75CorrectQuestions(0);
+        this.setNumAtLeast3Quizes(0);
+
+        for (Student student : this.getCourseExecution().getStudents()) {
+            for(QuizAnswer quizAnswer : student.getQuizAnswers()){
+                if(quizAnswer.getNumberOfCorrectAnswers() / quizAnswer.getQuiz().getQuizQuestionsNumber() >= 0.75)
+                    this.setNumMore75CorrectQuestions(this.getNumMore75CorrectQuestions() + 1);
+            } 
+            
+            if (student.getQuizAnswers().size() >= 3) {
+                this.setNumAtLeast3Quizes(this.getNumAtLeast3Quizes() + 1);
+            }
+        }
     }
 
     @Override

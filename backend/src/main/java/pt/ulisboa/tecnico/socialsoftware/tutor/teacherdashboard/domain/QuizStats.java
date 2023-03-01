@@ -18,12 +18,16 @@ public class QuizStats implements DomainEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     
-    private int numberOfQuizzes = 0;
-    private int numberOfUniqueQuizzesSolved = 0;
-    private int averageQuizzesSolved = 0;
+    private int numberOfQuizzes;
+    private int numberOfUniqueQuizzesSolved;
+    private int averageQuizzesSolved;
 
     @OneToOne
     private CourseExecution courseExecution;
+
+    @ManyToOne
+    private TeacherDashboard teacherDashboard;
+    
 
     QuizStats(CourseExecution courseExecution) {
         this.courseExecution = courseExecution;
@@ -42,13 +46,13 @@ public class QuizStats implements DomainEntity {
     }
 
     public void setNumberOfQuizzes() {
-        this.numberOfQuizzes = courseExecution.getNumberOfQuizzes();
+        this.numberOfQuizzes = this.courseExecution.getNumberOfQuizzes();
 
     }
 
     public void setNumberOfUniqueQuizzesSolved() {
         Set<QuizAnswer> quizAnswers = new HashSet<QuizAnswer>();
-        for (Student student : courseExecution.getStudents()) {
+        for (Student student : this.courseExecution.getStudents()) {
             quizAnswers.addAll(student.getQuizAnswers());
         }
         this.numberOfUniqueQuizzesSolved = quizAnswers.stream()
@@ -60,14 +64,15 @@ public class QuizStats implements DomainEntity {
 
     public void setAverageQuizzesSolved() {
         int sum = 0;
-        for (Student student : courseExecution.getStudents()) {
+        for (Student student : this.courseExecution.getStudents()) {
             sum += student.getQuizAnswers().stream()
                 .map((quizAnswer) -> quizAnswer.getQuiz().getId())
                 .distinct()
                 .collect(Collectors.toList())
                 .size();
         }
-        this.averageQuizzesSolved = sum / courseExecution.getStudents().size();
+        if (this.courseExecution.getStudents().size() == 0) {this.averageQuizzesSolved = 0;}
+        else {this.averageQuizzesSolved = sum / this.courseExecution.getStudents().size();}
     }
 
     public int getNumberOfQuizzes() {

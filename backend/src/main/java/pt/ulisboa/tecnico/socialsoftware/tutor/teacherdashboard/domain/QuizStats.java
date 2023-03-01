@@ -27,38 +27,38 @@ public class QuizStats implements DomainEntity {
 
     QuizStats(CourseExecution courseExecution) {
         this.courseExecution = courseExecution;
+        this.setNumberOfQuizzes();
+        this.setNumberOfUniqueQuizzesSolved();
+        this.setAverageQuizzesSolved();
     }
 
     public void update() {
         //get number of quizzes from course execution
-        this.numberOfQuizzes = updateNumberOfQuizzes();
+        this.setNumberOfQuizzes();
         //get number of unique quizzes solved from course execution
-        this.numberOfUniqueQuizzesSolved = updateNumberOfUniqueQuizzesSolved();
+        this.setNumberOfUniqueQuizzesSolved();
         //get average number of unique quizzes solved by student
-        this.averageQuizzesSolved = updateAverageQuizzesSolved();
+        this.setAverageQuizzesSolved();
+    }
 
-
+    public void setNumberOfQuizzes() {
+        this.numberOfQuizzes = courseExecution.getNumberOfQuizzes();
 
     }
 
-    public int updateNumberOfQuizzes() {
-        return courseExecution.getNumberOfQuizzes();
-
-    }
-
-    public int updateNumberOfUniqueQuizzesSolved() {
+    public void setNumberOfUniqueQuizzesSolved() {
         Set<QuizAnswer> quizAnswers = new HashSet<QuizAnswer>();
         for (Student student : courseExecution.getStudents()) {
             quizAnswers.addAll(student.getQuizAnswers());
         }
-        return quizAnswers.stream()
+        this.numberOfUniqueQuizzesSolved = quizAnswers.stream()
             .map((quizAnswer) -> quizAnswer.getQuiz().getId())
             .distinct()
             .collect(Collectors.toList())
             .size();
     }
 
-    public int updateAverageQuizzesSolved() {
+    public void setAverageQuizzesSolved() {
         int sum = 0;
         for (Student student : courseExecution.getStudents()) {
             sum += student.getQuizAnswers().stream()
@@ -67,12 +67,8 @@ public class QuizStats implements DomainEntity {
                 .collect(Collectors.toList())
                 .size();
         }
-        return sum / courseExecution.getStudents().size();
+        this.averageQuizzesSolved = sum / courseExecution.getStudents().size();
     }
-
-
-
-
 
     public int getNumberOfQuizzes() {
         return numberOfQuizzes;
@@ -86,11 +82,8 @@ public class QuizStats implements DomainEntity {
         return averageQuizzesSolved;
     }
 
-
-
     @Override
     public void accept(Visitor visitor) {
         // Only used for XML generation
     }
-    
 }

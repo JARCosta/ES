@@ -22,14 +22,12 @@ public class TeacherDashboard implements DomainEntity {
     @ManyToOne
     private CourseExecution courseExecution;
 
-    @OneToMany
-    private List<QuizStats> quizzesStats = new ArrayList<>();
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "teacherDashboard", orphanRemoval = true)
+    private final List<QuizStats> quizzesStats = new ArrayList<>();
 
     @ManyToOne
     private Teacher teacher;
 
-    public TeacherDashboard() {
-    }
 
     public TeacherDashboard(CourseExecution courseExecution, Teacher teacher) {
         setCourseExecution(courseExecution);

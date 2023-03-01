@@ -32,6 +32,9 @@ public class QuizStats implements DomainEntity {
     public void update() {
         //get number of quizzes from course execution
         this.numberOfQuizzes = updateNumberOfQuizzes();
+        //get number of unique quizzes solved from course execution
+        this.numberOfUniqueQuizzesSolved = updateNumberOfUniqueQuizzesSolved();
+
 
     }
 
@@ -40,12 +43,28 @@ public class QuizStats implements DomainEntity {
 
     }
 
+    public int updateNumberOfUniqueQuizzesSolved() {
+        Set<QuizAnswer> quizAnswers = new HashSet<QuizAnswer>();
+        for (Student student : courseExecution.getStudents()) {
+            quizAnswers.addAll(student.getQuizAnswers());
+        }
+        return quizAnswers.stream()
+            .map((quizAnswer) -> quizAnswer.getQuiz().getId())
+            .distinct()
+            .collect(Collectors.toList())
+            .size();
+    }
+
 
 
 
 
     public int getNumberOfQuizzes() {
         return numberOfQuizzes;
+    }
+
+    public int getNumberOfUniqueQuizzesSolved() {
+        return numberOfUniqueQuizzesSolved;
     }
 
 

@@ -34,6 +34,9 @@ public class QuizStats implements DomainEntity {
         this.numberOfQuizzes = updateNumberOfQuizzes();
         //get number of unique quizzes solved from course execution
         this.numberOfUniqueQuizzesSolved = updateNumberOfUniqueQuizzesSolved();
+        //get average number of unique quizzes solved by student
+        this.averageQuizzesSolved = updateAverageQuizzesSolved();
+
 
 
     }
@@ -55,6 +58,18 @@ public class QuizStats implements DomainEntity {
             .size();
     }
 
+    public int updateAverageQuizzesSolved() {
+        int sum = 0;
+        for (Student student : courseExecution.getStudents()) {
+            sum += student.getQuizAnswers().stream()
+                .map((quizAnswer) -> quizAnswer.getQuiz().getId())
+                .distinct()
+                .collect(Collectors.toList())
+                .size();
+        }
+        return sum / courseExecution.getStudents().size();
+    }
+
 
 
 
@@ -65,6 +80,10 @@ public class QuizStats implements DomainEntity {
 
     public int getNumberOfUniqueQuizzesSolved() {
         return numberOfUniqueQuizzesSolved;
+    }
+
+    public int getAverageQuizzesSolved() {
+        return averageQuizzesSolved;
     }
 
 

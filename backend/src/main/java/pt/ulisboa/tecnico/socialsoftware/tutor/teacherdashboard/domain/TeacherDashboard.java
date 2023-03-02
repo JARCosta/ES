@@ -7,6 +7,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.Visitor;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.domain.Teacher;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.*;
@@ -36,8 +37,8 @@ public class TeacherDashboard implements DomainEntity {
     }
 
     public void update() {
-        for (QuizStats QuizStats : quizzesStats) {
-            QuizStats.update();
+        for (QuizStats quizStats : quizzesStats) {
+            quizStats.update();
         }
     }
 
@@ -67,32 +68,8 @@ public class TeacherDashboard implements DomainEntity {
         this.teacher.addDashboard(this);
     }
 
-    public int getNumberOfQuizzes(){
-        int size = quizzesStats.size();
-        int nrOfQuizzes = 0;
-        for(int i = 0; size - i > 0 && i < 3; i++){
-            nrOfQuizzes += quizzesStats.get(size - i).getNumberOfQuizzes();
-        }
-        return nrOfQuizzes;
-    }
-
-    public int getNumberOfUniqueQuizzesSolved(){
-        int size = quizzesStats.size();
-        int nrOfUniqueQuizzesSolved = 0;
-        for(int i = 0; size - i > 0 && i < 3; i++){
-            nrOfUniqueQuizzesSolved += quizzesStats.get(size - i).getNumberOfUniqueQuizzesSolved();
-        }
-        return nrOfUniqueQuizzesSolved;
-    }
-
-    public float getAverageQuizzesSolved(){
-        int size = quizzesStats.size();
-        int avarageQuizzesSolved = 0;
-        int i;
-        for(i = 0; size - i > 0 && i < 3; i++){
-            avarageQuizzesSolved += quizzesStats.get(size - i).getAverageQuizzesSolved();
-        }
-        return avarageQuizzesSolved / i;
+    public List<QuizStats> getQuizStats(){
+        return Collections.unmodifiableList(this.quizzesStats);
     }
 
    // public void createQuizzesStats() {

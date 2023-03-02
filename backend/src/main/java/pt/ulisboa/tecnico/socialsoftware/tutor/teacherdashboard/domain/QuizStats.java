@@ -5,10 +5,14 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.execution.domain.CourseExecution;
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.DomainEntity;
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.Visitor;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.domain.Student;
+import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
+
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.persistence.*;
+
+import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 
 
 @Entity
@@ -28,8 +32,15 @@ public class QuizStats implements DomainEntity {
     @ManyToOne
     private TeacherDashboard teacherDashboard;
     
+    public QuizStats(){
 
-    QuizStats(CourseExecution courseExecution) {
+    }
+
+    public QuizStats(CourseExecution courseExecution) {
+        if (!(courseExecution instanceof CourseExecution)){
+            throw new TutorException(NOT_AN_INSTANCE_OF_COURSE_EXECUTION);
+        }
+        
         this.courseExecution = courseExecution;
         this.setNumberOfQuizzes();
         this.setNumberOfUniqueQuizzesSolved();
@@ -95,4 +106,6 @@ public class QuizStats implements DomainEntity {
     public void accept(Visitor visitor) {
         // Only used for XML generation
     }
+
+
 }

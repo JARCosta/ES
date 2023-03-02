@@ -12,7 +12,7 @@ import javax.persistence.*;
 public class StudentStats implements DomainEntity {
     
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     private Integer numStudents;
@@ -30,20 +30,19 @@ public class StudentStats implements DomainEntity {
     public StudentStats() {
     }
 
-    public StudentStats(Integer id, Integer numStudents, Integer numMore75CorrectQuestions, Integer numAtLeast3Quizes, TeacherDashboard teacherDashboard, CourseExecution courseExecution) {
+    public StudentStats(TeacherDashboard teacherDashboard, CourseExecution courseExecution) {
         // if(0 students over this and the last 2 years?)
         //     CANNOT_CREATE_STUDENT_STATS
-        setId(id);
-        setNumStudents(numStudents);
-        setNumMore75CorrectQuestions(numMore75CorrectQuestions);
-        setNumAtLeast3Quizes(numAtLeast3Quizes);
         setTeacherDashboard(teacherDashboard);
         setCourseExecution(courseExecution);
+        update();
     }
 
     public void remove() {
-        // courseExecution.getStudentStats().remove(this);
-        // courseExecution = null;
+        courseExecution.setStudentStats(null);
+        teacherDashboard.getStudentStats().remove(this);
+        courseExecution = null;
+        teacherDashboard = null;
     }
 
     public CourseExecution getCourseExecution(){
@@ -57,10 +56,6 @@ public class StudentStats implements DomainEntity {
     
     public Integer getId() {
         return id;
-    }
-
-    public void setId(Integer id){
-        this.id = id;
     }
 
     public Integer getNumStudents(){
@@ -103,8 +98,9 @@ public class StudentStats implements DomainEntity {
 
         for (Student student : this.getCourseExecution().getStudents()) {
             for(QuizAnswer quizAnswer : student.getQuizAnswers()){
-                if(quizAnswer.getNumberOfCorrectAnswers() / quizAnswer.getQuiz().getQuizQuestionsNumber() >= 0.75)
-                    this.setNumMore75CorrectQuestions(this.getNumMore75CorrectQuestions() + 1);
+                if(quizAnswer.getQuiz().getCourseExecution().getId() == this.getCourseExecution().getId())
+                    if(quizAnswer.getNumberOfCorrectAnswers() / quizAnswer.getQuiz().getQuizQuestionsNumber() >= 0.75)
+                        this.setNumMore75CorrectQuestions(this.getNumMore75CorrectQuestions() + 1);
             } 
             
             if (student.getQuizAnswers().size() >= 3) {

@@ -54,7 +54,7 @@ public class CourseExecution implements DomainEntity {
     private final Set<DifficultQuestion> difficultQuestions = new HashSet<>();
     
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "courseExecution", orphanRemoval = true)
-    private StudentStats studentStats = new StudentStats();
+    private StudentStats studentStats ;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "courseExecution", orphanRemoval = true)
     private final Set<TeacherDashboard> teacherDashboards = new HashSet<>();
@@ -220,6 +220,14 @@ public class CourseExecution implements DomainEntity {
             throw new TutorException(ErrorMessage.DIFFICULT_QUESTION_ALREADY_CREATED);
         }
         difficultQuestions.add(difficultQuestion);
+    }
+
+    public StudentStats getStudentStats() {
+        return studentStats;
+    }
+
+    public void setStudentStats(StudentStats studentStats) {
+        this.studentStats = studentStats;
     }
 
     @Override

@@ -5,6 +5,9 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.DomainEntity;
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.Visitor;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.domain.Teacher;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.*;
 
 
@@ -21,12 +24,16 @@ public class TeacherDashboard implements DomainEntity {
     @ManyToOne
     private Teacher teacher;
 
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "teacherDashboard", orphanRemoval = true)
+    private List<QuestionStats> questionsStats = new ArrayList<>();
+
     public TeacherDashboard() {
     }
 
     public TeacherDashboard(CourseExecution courseExecution, Teacher teacher) {
         setCourseExecution(courseExecution);
         setTeacher(teacher);
+        update();
     }
 
     public void remove() {
@@ -57,6 +64,12 @@ public class TeacherDashboard implements DomainEntity {
 
     public void accept(Visitor visitor) {
         // Only used for XML generation
+    }
+
+    public void update() {
+        for (QuestionStats qs : questionsStats) {
+            qs.update();
+        }
     }
 
     @Override

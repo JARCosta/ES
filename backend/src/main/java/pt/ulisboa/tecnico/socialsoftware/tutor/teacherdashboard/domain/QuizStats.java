@@ -107,5 +107,16 @@ public class QuizStats implements DomainEntity {
         // Only used for XML generation
     }
 
+    @Override
+    public String toString() {
+        return "QuizStats{" +
+                "id=" + id +
+                ", numberOfQuizzes=" + numberOfQuizzes +
+                ", numberOfUniqueQuizzesSolved=" + numberOfUniqueQuizzesSolved +
+                ", averageQuizzesSolved=" + averageQuizzesSolved +
+                ", courseExecution=" + courseExecution +
+                '}';
+    }
+
 
 }

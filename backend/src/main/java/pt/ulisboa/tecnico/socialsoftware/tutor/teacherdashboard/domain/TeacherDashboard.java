@@ -61,6 +61,14 @@ public class TeacherDashboard implements DomainEntity {
         this.teacher.addDashboard(this);
     }
 
+    public List<StudentStats> getStudentStats() {
+        return studentStats;
+    }
+
+    public void addStudentStats(StudentStats studentStats) {
+        this.studentStats.add(studentStats);
+    }
+
     public void accept(Visitor visitor) {
         // Only used for XML generation
     }

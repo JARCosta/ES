@@ -12,6 +12,9 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuizAnswer
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.domain.Student
 import pt.ulisboa.tecnico.socialsoftware.tutor.auth.domain.AuthUser
 
+import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
+import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
+
 
 @DataJpaTest
 class CreateQuizStatsTest extends SpockTest {
@@ -89,6 +92,15 @@ class CreateQuizStatsTest extends SpockTest {
         quizstats.getNumberOfQuizzes() == 1
         quizstats.getNumberOfUniqueQuizzesSolved() == 1
         quizstats.getAverageQuizzesSolved() == 1
+    }
+
+    def "create quiz states with no course execution"(){
+        when: "attempt to create quizzStats with a null course execution"
+        quizstats = new QuizStats(null)
+
+        then: "exception is thrown"
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == NOT_AN_INSTANCE_OF_COURSE_EXECUTION
     }
         
     @TestConfiguration

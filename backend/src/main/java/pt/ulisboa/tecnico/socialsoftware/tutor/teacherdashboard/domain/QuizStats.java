@@ -20,7 +20,7 @@ public class QuizStats implements DomainEntity {
     
     private int numberOfQuizzes;
     private int numberOfUniqueQuizzesSolved;
-    private int averageQuizzesSolved;
+    private float averageQuizzesSolved;
 
     @OneToOne
     private CourseExecution courseExecution;
@@ -71,8 +71,12 @@ public class QuizStats implements DomainEntity {
                 .collect(Collectors.toList())
                 .size();
         }
-        if (this.courseExecution.getStudents().size() == 0) {this.averageQuizzesSolved = 0;}
-        else {this.averageQuizzesSolved = sum / this.courseExecution.getStudents().size();}
+        if (this.courseExecution.getStudents().size() == 0) {
+            this.averageQuizzesSolved = 0;
+        }
+        else {
+            this.averageQuizzesSolved = sum / this.courseExecution.getStudents().size();
+        }
     }
 
     public int getNumberOfQuizzes() {
@@ -83,7 +87,7 @@ public class QuizStats implements DomainEntity {
         return numberOfUniqueQuizzesSolved;
     }
 
-    public int getAverageQuizzesSolved() {
+    public float getAverageQuizzesSolved() {
         return averageQuizzesSolved;
     }
 

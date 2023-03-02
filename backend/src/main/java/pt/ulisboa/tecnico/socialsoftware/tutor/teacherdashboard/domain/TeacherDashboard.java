@@ -67,6 +67,34 @@ public class TeacherDashboard implements DomainEntity {
         this.teacher.addDashboard(this);
     }
 
+    public int getNumberOfQuizzes(){
+        int size = quizzesStats.size();
+        int nrOfQuizzes = 0;
+        for(int i = 0; size - i > 0 && i < 3; i++){
+            nrOfQuizzes += quizzesStats.get(size - i).getNumberOfQuizzes();
+        }
+        return nrOfQuizzes;
+    }
+
+    public int getNumberOfUniqueQuizzesSolved(){
+        int size = quizzesStats.size();
+        int nrOfUniqueQuizzesSolved = 0;
+        for(int i = 0; size - i > 0 && i < 3; i++){
+            nrOfUniqueQuizzesSolved += quizzesStats.get(size - i).getNumberOfUniqueQuizzesSolved();
+        }
+        return nrOfUniqueQuizzesSolved;
+    }
+
+    public float getAverageQuizzesSolved(){
+        int size = quizzesStats.size();
+        int avarageQuizzesSolved = 0;
+        int i;
+        for(i = 0; size - i > 0 && i < 3; i++){
+            avarageQuizzesSolved += quizzesStats.get(size - i).getAverageQuizzesSolved();
+        }
+        return avarageQuizzesSolved / i;
+    }
+
    // public void createQuizzesStats() {
         //quizzesStats.add(new QuizStats(this.courseExecution));
         /* //get a list of the last 3 course executions (sprint2)

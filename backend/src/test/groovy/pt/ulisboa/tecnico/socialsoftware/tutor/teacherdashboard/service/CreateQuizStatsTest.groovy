@@ -102,6 +102,22 @@ class CreateQuizStatsTest extends SpockTest {
         def exception = thrown(TutorException)
         exception.getErrorMessage() == NOT_AN_INSTANCE_OF_COURSE_EXECUTION
     }
+
+    def "teste toString method"(){
+        when: "string a quizstat"
+        quizstats = new QuizStats(externalCourseExecution)
+        String str = quizstats.toString()
+
+        then:
+        str == "QuizStats{" +
+                "id=" + quizstats.getId() +
+                ", numberOfQuizzes=" + quizstats.getNumberOfQuizzes() +
+                ", numberOfUniqueQuizzesSolved=" + quizstats.getNumberOfUniqueQuizzesSolved() +
+                ", averageQuizzesSolved=" + quizstats.getAverageQuizzesSolved() +
+                ", courseExecution=" + quizstats.getCourseExecution() +
+                '}';
+
+    }
         
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}

@@ -40,7 +40,7 @@ public class QuizStats implements DomainEntity {
         if (!(courseExecution instanceof CourseExecution)){
             throw new TutorException(NOT_AN_INSTANCE_OF_COURSE_EXECUTION);
         }
-        
+
         this.courseExecution = courseExecution;
         this.setNumberOfQuizzes();
         this.setNumberOfUniqueQuizzesSolved();
@@ -88,6 +88,14 @@ public class QuizStats implements DomainEntity {
         else {
             this.averageQuizzesSolved = sum / this.courseExecution.getStudents().size();
         }
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public CourseExecution getCourseExecution(){
+        return courseExecution;
     }
 
     public int getNumberOfQuizzes() {

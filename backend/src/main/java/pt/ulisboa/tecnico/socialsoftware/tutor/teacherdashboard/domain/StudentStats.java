@@ -30,11 +30,13 @@ public class StudentStats implements DomainEntity {
     public StudentStats() {
     }
 
-    public StudentStats(TeacherDashboard teacherDashboard, CourseExecution courseExecution) {
+    public StudentStats(TeacherDashboard teacherDashboard) {
         // if(0 students over this and the last 2 years?)
         //     CANNOT_CREATE_STUDENT_STATS
         setTeacherDashboard(teacherDashboard);
-        setCourseExecution(courseExecution);
+        teacherDashboard.addStudentStats(this);
+        setCourseExecution(teacherDashboard.getCourseExecution());
+        courseExecution.setStudentStats(this);
         update();
     }
 

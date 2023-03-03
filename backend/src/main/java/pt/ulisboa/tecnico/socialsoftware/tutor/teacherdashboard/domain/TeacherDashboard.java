@@ -73,6 +73,12 @@ public class TeacherDashboard implements DomainEntity {
         // Only used for XML generation
     }
 
+    public void update() {
+        studentStats.forEach(s -> {
+            s.update();
+        });
+    }
+
     @Override
     public String toString() {
         return "Dashboard{" +

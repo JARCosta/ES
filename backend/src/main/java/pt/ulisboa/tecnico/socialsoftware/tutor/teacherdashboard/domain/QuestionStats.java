@@ -1,122 +1,122 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.domain;
 
-import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuizAnswer;
+import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuestionAnswer;
 import pt.ulisboa.tecnico.socialsoftware.tutor.execution.domain.CourseExecution;
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.DomainEntity;
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.Visitor;
-import pt.ulisboa.tecnico.socialsoftware.tutor.user.domain.Student;
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
-import pt.ulisboa.tecnico.socialsoftware.tutor.questionsubmission.domain.QuestionSubmission;
-
-import java.util.Arrays;
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question.Status;
+import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.QuizQuestion;
 
 import javax.persistence.*;
 
 @Entity
 public class QuestionStats implements DomainEntity {
-    
+
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    private Integer numQuestAvail;
-
-    private Integer ansQuestUniq;
-
-    private Float avgQuestAns;
+    @OneToOne
+    private CourseExecution execution;
 
     @ManyToOne
-    private TeacherDashboard teacherDashboard;
+    private TeacherDashboard dashboard;
 
-    @OneToOne
-    private CourseExecution courseExecution;
+    private Integer numAvailable, answeredQuestionsUnique;
+    private Float averageQuestionsAnswered;
 
-    public void QuestionStats() {
+    public QuestionStats () {}
+
+    public QuestionStats (TeacherDashboard dashboard, CourseExecution execution) {
+        setDashboard(dashboard);
+        setCourseExecution(execution);
+        numAvailable = 0;
+        answeredQuestionsUnique = 0;
+        averageQuestionsAnswered = 0.0f;        
     }
 
-    public void QuestionStats(TeacherDashboard teacherDashboard, CourseExecution courseExecution) {
-
-        setTeacherDashboard(teacherDashboard);
-        setCourseExecution(courseExecution);
-        update();
+    public void setDashboard (TeacherDashboard dashboard) {
+        this.dashboard = dashboard;
+        dashboard.addQuestionStats(this);
     }
 
-    public void remove() {
+    public void setCourseExecution (CourseExecution execution) {
+        this.execution = execution;
     }
 
-    public CourseExecution getCourseExecution(){
-        return courseExecution;
+    public CourseExecution getCourseExecution () {
+        return this.execution;
     }
-    
-    public void setCourseExecution(CourseExecution courseExecution) {
-        this.courseExecution = courseExecution;
-        // this.courseExecution.addStudentStats(this);
+
+    public TeacherDashboard getTeacherDashboard () {
+        return this.dashboard;
     }
-    
+
     public Integer getId() {
-        return id;
+        return this.id;
     }
 
-    public void setId(Integer id){
-        this.id = id;
+    public void remove () {
+        execution = null;
+        dashboard.getQuestionStats().remove(this);
+        dashboard = null;
     }
 
-    public Integer getnumQuestAvail(){
-        return numQuestAvail;
+    public Integer getNumAvailable() {
+        return this.numAvailable;
     }
 
-    public void setnumQuestAvail(Integer numQuestAvail){
-        this.numQuestAvail = numQuestAvail;
-    }
-    
-    public Integer getansQuestUniq(){
-        return ansQuestUniq;
+    public Integer getAnsweredQuestionsUnique() {
+        return this.answeredQuestionsUnique;
     }
 
-    public void setansQuestUniq(Integer ansQuestUniq){
-        this.ansQuestUniq = ansQuestUniq;
-    }
-    
-    public float getavgQuestAns(){
-        return avgQuestAns;
+    public Float getAverageQuestionsAnswered() {
+        return this.averageQuestionsAnswered;
     }
 
-    public void setavgQuestAns(Float avgQuestAns){
-        this.avgQuestAns = avgQuestAns;
-    }
-
-    public TeacherDashboard getTeacherDashboard(){
-        return teacherDashboard;
-    }
-
-    public void setTeacherDashboard(TeacherDashboard teacherDashboard){
-        this.teacherDashboard = teacherDashboard;
-    }
-
-    public void update(){
-
-        /*int totalquest = 0;
-        for (Question question : this.getCourseExecution().getQuestions()) {
-            if (question.getStatus() == Question.Stats.AVAILABLE) {
-                totalquest ++;
-            }
-        }*/
-        this.setnumQuestAvail(this.courseExecution.getNumberOfQuestions());
-
-        this.setansQuestUniq((int)courseExecution.getQuestionSubmissions().stream()
-            .map(sub -> Arrays.asList(sub.getSubmitter(), sub.getQuestion()))
+    public void update() {
+        // number of available questions
+        this.numAvailable = (int) execution.getQuizzes().stream()
+            .flatMap(q -> q.getQuizQuestions().stream())
+            .map(QuizQuestion::getQuestion)
+            .filter(q -> q.getStatus() == Status.AVAILABLE)
             .distinct()
-            .count()
-        );
-        //make setansQuestUni
+            .count();
+        
+        // number of answered questions at least once
+        this.answeredQuestionsUnique = (int) execution.getQuizzes().stream()
+                .flatMap(q -> q.getQuizAnswers() .stream()
+                    .flatMap(qa -> qa.getQuestionAnswers().stream()
+                        .map(QuestionAnswer::getQuestion)))
+            .distinct()
+            .count();
 
-            
-        this.setavgQuestAns((float)this.getansQuestUniq()/this.courseExecution.getStudents().size());
+        // number of students 
+        int students = execution.getStudents().size();
+
+        long uniqueAllStudents = execution.getStudents().stream().mapToLong(student -> 
+            student.getQuizAnswers().stream().flatMap(
+                qa -> qa.getQuestionAnswers().stream().map(QuestionAnswer::getQuestion)
+            ).distinct().count()).sum();
+
+        // average
+        this.averageQuestionsAnswered = students > 0 ? (float) uniqueAllStudents / students : 0.0f;
     }
 
     @Override
     public void accept(Visitor visitor) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'accept'");
+        
     }
+
+    @Override
+    public String toString() {
+        return "QuestionStats{" +
+            "id=" + id +
+            ", teacherDashboard=" + dashboard.getId() +
+            ", courseExecution=" + execution.getId() +
+            ", numAvailable=" + numAvailable +
+            ", answeredQuestionsUnique=" + answeredQuestionsUnique +
+            ", averageQuestionsAnswered=" + averageQuestionsAnswered +
+            '}';
+      }
 }

@@ -8,4 +8,5 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.domain.QuestionS
 @Repository
 @Transactional
 public interface QuestionStatsRepository extends JpaRepository<QuestionStats, Integer> {
+    
 }

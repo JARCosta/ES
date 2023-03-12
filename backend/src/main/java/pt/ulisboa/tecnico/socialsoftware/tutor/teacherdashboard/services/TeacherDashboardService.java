@@ -7,8 +7,10 @@ import org.springframework.transaction.annotation.Transactional;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.execution.domain.CourseExecution;
 import pt.ulisboa.tecnico.socialsoftware.tutor.execution.repository.CourseExecutionRepository;
+import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.domain.StudentStats;
 import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.domain.TeacherDashboard;
 import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.dto.TeacherDashboardDto;
+import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.repository.StudentStatsRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.repository.TeacherDashboardRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.domain.Teacher;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.repository.TeacherRepository;
@@ -28,6 +30,9 @@ public class TeacherDashboardService {
 
     @Autowired
     private TeacherDashboardRepository teacherDashboardRepository;
+
+    @Autowired
+    private StudentStatsRepository studentStatRepository;
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public TeacherDashboardDto getTeacherDashboard(int courseExecutionId, int teacherId) {
@@ -66,9 +71,34 @@ public class TeacherDashboardService {
 
     private TeacherDashboardDto createAndReturnTeacherDashboardDto(CourseExecution courseExecution, Teacher teacher) {
         TeacherDashboard teacherDashboard = new TeacherDashboard(courseExecution, teacher);
+        teacherDashboard.setStudentStats(studentStatRepository.findAllById(null));
+        List<StudentStats> studentStats = new ArrayList<>();
+        for(StudentStats studentStat : studentStatRepository.findAll()){
+            if(studentStat.getCourseExecution().getId().equals(courseExecution.getId()))
+                studentStats.add(studentStat);
+            else if(studentStat.getCourseExecution().getYear() == courseExecution.getYear() - 1 )
+                studentStats.add(studentStat);
+            else if(studentStat.getCourseExecution().getYear() == courseExecution.getYear() - 2 )
+                studentStats.add(studentStat);
+        }
+        teacherDashboard.setStudentStats(studentStats);
+
         teacherDashboardRepository.save(teacherDashboard);
 
         return new TeacherDashboardDto(teacherDashboard);
+    }
+
+    public void updateTeacherDashboard(int dashboardId){
+        TeacherDashboard teacherDashboard = teacherDashboardRepository.findById(dashboardId)
+                .orElseThrow(() -> new TutorException(DASHBOARD_NOT_FOUND, dashboardId));
+        teacherDashboard.update();
+    }
+
+    public void updateAllTeacherDashboards(){
+        List<TeacherDashboard> teacherDashboards = teacherDashboardRepository.findAll();
+        for (TeacherDashboard teacherDashboard : teacherDashboards) {
+            teacherDashboard.update();
+        }
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)

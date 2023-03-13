@@ -71,7 +71,6 @@ public class TeacherDashboardService {
 
     private TeacherDashboardDto createAndReturnTeacherDashboardDto(CourseExecution courseExecution, Teacher teacher) {
         TeacherDashboard teacherDashboard = new TeacherDashboard(courseExecution, teacher);
-        teacherDashboard.setStudentStats(studentStatRepository.findAllById(null));
         List<StudentStats> studentStats = new ArrayList<>();
         for(StudentStats studentStat : studentStatRepository.findAll()){
             if(studentStat.getCourseExecution().getId().equals(courseExecution.getId()))

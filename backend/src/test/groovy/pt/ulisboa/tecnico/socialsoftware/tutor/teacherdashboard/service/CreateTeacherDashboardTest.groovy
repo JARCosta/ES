@@ -92,6 +92,19 @@ import spock.lang.Unroll
         teacherId << [0, 100]
     }
 
+    def "dashboard is created with student stats"(){
+        given: "a teacher in a course execution"
+        teacher.addCourse(externalCourseExecution)
+
+        when: "a dashboard is created"
+        teacherDashboardService.getTeacherDashboard(externalCourseExecution.getId(), teacher.getId())
+
+        then: "an empty dashboard is created"
+        
+        teacherDashboardRepository.count() == 1L
+        studentStatsRepository.count() != 0
+    }
+
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}
 }

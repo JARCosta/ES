@@ -72,13 +72,20 @@ public class TeacherDashboardService {
     private TeacherDashboardDto createAndReturnTeacherDashboardDto(CourseExecution courseExecution, Teacher teacher) {
         TeacherDashboard teacherDashboard = new TeacherDashboard(courseExecution, teacher);
         List<StudentStats> studentStats = new ArrayList<>();
-        for(StudentStats studentStat : studentStatsRepository.findAll()){
-            if(studentStat.getCourseExecution().getId().equals(courseExecution.getId()))
-                studentStats.add(studentStat);
-            else if(studentStat.getCourseExecution().getYear() == courseExecution.getYear() - 1 )
-                studentStats.add(studentStat);
-            else if(studentStat.getCourseExecution().getYear() == courseExecution.getYear() - 2 )
-                studentStats.add(studentStat);
+
+        for(int i = 0; i < 3; i++ ){
+            boolean createFlag = true;
+            for(StudentStats studentStat : studentStatsRepository.findAll())
+                if (studentStat.getCourseExecution().getYear() == courseExecution.getYear() - i){
+                    studentStats.add(studentStat);
+                    createFlag = false;
+                    break;
+                }
+            if(createFlag){
+                StudentStats newStudentStats = new StudentStats(teacherDashboard, courseExecution);
+                studentStatsRepository.save(newStudentStats);
+                studentStats.add(newStudentStats);
+            }
         }
         teacherDashboard.setStudentStats(studentStats);
 

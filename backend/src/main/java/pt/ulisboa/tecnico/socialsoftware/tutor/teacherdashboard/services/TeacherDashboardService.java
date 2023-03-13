@@ -32,7 +32,7 @@ public class TeacherDashboardService {
     private TeacherDashboardRepository teacherDashboardRepository;
 
     @Autowired
-    private StudentStatsRepository studentStatRepository;
+    private StudentStatsRepository studentStatsRepository;
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public TeacherDashboardDto getTeacherDashboard(int courseExecutionId, int teacherId) {
@@ -72,7 +72,7 @@ public class TeacherDashboardService {
     private TeacherDashboardDto createAndReturnTeacherDashboardDto(CourseExecution courseExecution, Teacher teacher) {
         TeacherDashboard teacherDashboard = new TeacherDashboard(courseExecution, teacher);
         List<StudentStats> studentStats = new ArrayList<>();
-        for(StudentStats studentStat : studentStatRepository.findAll()){
+        for(StudentStats studentStat : studentStatsRepository.findAll()){
             if(studentStat.getCourseExecution().getId().equals(courseExecution.getId()))
                 studentStats.add(studentStat);
             else if(studentStat.getCourseExecution().getYear() == courseExecution.getYear() - 1 )
@@ -106,8 +106,18 @@ public class TeacherDashboardService {
             throw new TutorException(DASHBOARD_NOT_FOUND, -1);
 
         TeacherDashboard teacherDashboard = teacherDashboardRepository.findById(dashboardId).orElseThrow(() -> new TutorException(DASHBOARD_NOT_FOUND, dashboardId));
+        
+        Iterator<StudentStats> iterator = teacherDashboard.getStudentStats().iterator();
+
+        while(iterator.hasNext()){
+            StudentStats studentStats = iterator.next();
+            studentStats.remove();
+            studentStatsRepository.delete(studentStats);
+        }
+        
         teacherDashboard.remove();
         teacherDashboardRepository.delete(teacherDashboard);
     }
 
 }
+

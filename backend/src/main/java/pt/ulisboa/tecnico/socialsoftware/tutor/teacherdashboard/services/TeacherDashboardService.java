@@ -12,10 +12,13 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.domain.TeacherDa
 import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.dto.TeacherDashboardDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.repository.StudentStatsRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.repository.TeacherDashboardRepository;
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.domain.Student;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.domain.Teacher;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.repository.TeacherRepository;
 
 import java.util.*;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 
@@ -71,24 +74,16 @@ public class TeacherDashboardService {
 
     private TeacherDashboardDto createAndReturnTeacherDashboardDto(CourseExecution courseExecution, Teacher teacher) {
         TeacherDashboard teacherDashboard = new TeacherDashboard(courseExecution, teacher);
-        List<StudentStats> studentStats = new ArrayList<>();
+        
+        List<CourseExecution> coursesFromLast3Years2 = courseExecutionRepository.findAll().stream()
+                                            .filter( ce -> ce.getCourse() == courseExecution.getCourse())
+                                            .sorted().limit(3)
+                                            .collect(Collectors.toList());
 
-        for(int i = 0; i < 3; i++ ){
-            boolean createFlag = true;
-            for(StudentStats studentStat : studentStatsRepository.findAll())
-                if (studentStat.getCourseExecution().getYear() == courseExecution.getYear() - i){
-                    studentStats.add(studentStat);
-                    createFlag = false;
-                    break;
-                }
-            if(createFlag){
-                StudentStats newStudentStats = new StudentStats(teacherDashboard, courseExecution);
-                studentStatsRepository.save(newStudentStats);
-                studentStats.add(newStudentStats);
-            }
+        for(StudentStats ss : studentStatsRepository.findAll()){
+            if(coursesFromLast3Years2.contains(ss.getCourseExecution()))
+                teacherDashboard.addStudentStats(ss);
         }
-        teacherDashboard.setStudentStats(studentStats);
-
         teacherDashboardRepository.save(teacherDashboard);
 
         return new TeacherDashboardDto(teacherDashboard);

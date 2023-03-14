@@ -118,6 +118,7 @@ public class TeacherDashboardService {
 
         while(iterator.hasNext()){
             StudentStats studentStats = iterator.next();
+            iterator.remove();
             studentStats.remove();
             studentStatsRepository.delete(studentStats);
         }

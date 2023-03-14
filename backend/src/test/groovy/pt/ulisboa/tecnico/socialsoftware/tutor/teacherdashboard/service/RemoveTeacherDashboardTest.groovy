@@ -66,6 +66,22 @@ class RemoveTeacherDashboardTest extends SpockTest {
         dashboardId << [null, 10, -1]
     }
 
+    def "removes the statistics on teacher dashboard when its removed"(){
+        given: "a dashboard"
+        teacher.addCourse(externalCourseExecution)
+        teacherDashboardService.getTeacherDashboard(externalCourseExecution.getId(),teacher.getId())
+
+        when: "the user removes the dashboard"
+        studentStatsRepository.count() != 0
+        teacherDashboardService.removeTeacherDashboard(teacherDashboardRepository.findAll().get(0).getId())
+
+        then: "the statistics are removed"
+        teacherDashboardRepository.count() == 0
+        studentStatsRepository.count() == 0  
+        teacher.getDashboards().size() == 0
+
+    }
+
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}
 }

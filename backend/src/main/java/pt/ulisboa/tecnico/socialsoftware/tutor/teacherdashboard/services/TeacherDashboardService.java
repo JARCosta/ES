@@ -84,18 +84,12 @@ public class TeacherDashboardService {
         System.out.println("size of list: " + coursesFromLast3Years.size());
 
         for(CourseExecution ce : coursesFromLast3Years){
-            if(ce.getStudentStats() != null){
+            if(ce.getStudentStats() != null)
                 teacherDashboard.addStudentStats(ce.getStudentStats());
+            else
+                studentStatsRepository.save(new StudentStats(teacherDashboard, ce));
             }
-            else{
-                StudentStats newSS = new StudentStats(teacherDashboard, ce);
-                teacherDashboard.addStudentStats(newSS);
-                studentStatsRepository.save(newSS);
-            }
-            System.out.println("vski\n");
-        }
         teacherDashboardRepository.save(teacherDashboard);
-        System.out.println("size: " + teacherDashboard.getStudentStats().size());
         return new TeacherDashboardDto(teacherDashboard);
     }
 
@@ -118,9 +112,9 @@ public class TeacherDashboardService {
             throw new TutorException(DASHBOARD_NOT_FOUND, -1);
 
         TeacherDashboard teacherDashboard = teacherDashboardRepository.findById(dashboardId).orElseThrow(() -> new TutorException(DASHBOARD_NOT_FOUND, dashboardId));
-        
-        Iterator<StudentStats> iterator = teacherDashboard.getStudentStats().iterator();
 
+        Iterator<StudentStats> iterator = teacherDashboard.getStudentStats().iterator();
+        
         while(iterator.hasNext()){
             StudentStats studentStats = iterator.next();
             iterator.remove();

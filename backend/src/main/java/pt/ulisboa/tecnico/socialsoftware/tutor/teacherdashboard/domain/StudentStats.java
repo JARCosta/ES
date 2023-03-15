@@ -41,6 +41,7 @@ public class StudentStats {
     public StudentStats(TeacherDashboard teacherDashboard, CourseExecution courseExecution) {
         setTeacherDashboard(teacherDashboard);
         setCourseExecution(courseExecution);
+        courseExecution.setStudentStats(this);
     }
 
     public void remove() {

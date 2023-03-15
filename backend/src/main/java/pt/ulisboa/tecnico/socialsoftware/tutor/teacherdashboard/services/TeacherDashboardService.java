@@ -75,17 +75,27 @@ public class TeacherDashboardService {
     private TeacherDashboardDto createAndReturnTeacherDashboardDto(CourseExecution courseExecution, Teacher teacher) {
         TeacherDashboard teacherDashboard = new TeacherDashboard(courseExecution, teacher);
         
-        List<CourseExecution> coursesFromLast3Years2 = courseExecutionRepository.findAll().stream()
+        List<CourseExecution> coursesFromLast3Years = courseExecutionRepository.findAll().stream()
                                             .filter( ce -> ce.getCourse() == courseExecution.getCourse())
-                                            .sorted().limit(3)
-                                            .collect(Collectors.toList());
+                                            .sorted((ss1, ss2) -> ss2.getAcademicTerm().compareTo(ss1.getAcademicTerm()))
+                                            .limit(3).collect(Collectors.toList());
+        
+        System.out.println("size: " + teacherDashboard.getStudentStats().size());
+        System.out.println("size of list: " + coursesFromLast3Years.size());
 
-        for(StudentStats ss : studentStatsRepository.findAll()){
-            if(coursesFromLast3Years2.contains(ss.getCourseExecution()))
-                teacherDashboard.addStudentStats(ss);
+        for(CourseExecution ce : coursesFromLast3Years){
+            if(ce.getStudentStats() != null){
+                teacherDashboard.addStudentStats(ce.getStudentStats());
+            }
+            else{
+                StudentStats newSS = new StudentStats(teacherDashboard, ce);
+                teacherDashboard.addStudentStats(newSS);
+                studentStatsRepository.save(newSS);
+            }
+            System.out.println("vski\n");
         }
         teacherDashboardRepository.save(teacherDashboard);
-
+        System.out.println("size: " + teacherDashboard.getStudentStats().size());
         return new TeacherDashboardDto(teacherDashboard);
     }
 

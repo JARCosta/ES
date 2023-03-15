@@ -32,7 +32,10 @@ class UpdateTeacherDashboardTest extends SpockTest {
 
         and: "a change on the dashboard's stats"
         def teacherDashboard = teacherDashboardRepository.findAll().get(0)
-        def studentStats = new StudentStats(teacherDashboard, externalCourseExecution)
+        // def studentStats = new StudentStats(teacherDashboard, externalCourseExecution)
+        // studentStatsRepository.save(studentStats)
+        // teacherDashboard.addStudentStats(studentStats)
+
         // teacherDashboard.addStudentStats(studentStats)
         // studentStatsRepository.save(studentStats)
         // def studentStats = teacherDashboard.getStudentStats().get(0)

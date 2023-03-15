@@ -72,14 +72,18 @@ class RemoveTeacherDashboardTest extends SpockTest {
         teacherDashboardService.getTeacherDashboard(externalCourseExecution.getId(),teacher.getId())
 
         when: "the user removes the dashboard"
-        studentStatsRepository.count() != 0
+        assert studentStatsRepository.count() == 1
+        assert teacherDashboardRepository.count() == 1
+        assert teacher.getDashboards().size() == 1
+        assert teacherDashboardRepository.findAll().get(0).getStudentStats().size() == 1
+        assert teacherDashboardRepository.findAll().get(0).getTeacher() == teacher
         teacherDashboardService.removeTeacherDashboard(teacherDashboardRepository.findAll().get(0).getId())
 
         then: "the statistics are removed"
         teacherDashboardRepository.count() == 0
-        studentStatsRepository.count() == 0  
         teacher.getDashboards().size() == 0
-
+        studentStatsRepository.count() == 0
+        
     }
 
     @TestConfiguration

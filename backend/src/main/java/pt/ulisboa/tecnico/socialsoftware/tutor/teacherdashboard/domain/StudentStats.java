@@ -46,6 +46,7 @@ public class StudentStats {
 
     public void remove() {
         teacherDashboard.getStudentStats().remove(this);
+        courseExecution.removeStudentStats();
         courseExecution = null;
         teacherDashboard = null;
     }

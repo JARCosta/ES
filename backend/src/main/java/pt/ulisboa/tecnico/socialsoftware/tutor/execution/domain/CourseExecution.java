@@ -227,6 +227,10 @@ public class CourseExecution implements DomainEntity {
         this.studentStats = studentStats;
     }
 
+    public void removeStudentStats(){
+        this.studentStats = null;
+    }
+
     @Override
     public String toString() {
         return "CourseExecution{" +

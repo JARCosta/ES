@@ -103,6 +103,17 @@ public class TeacherDashboardService {
         teacherDashboard.update();
     }
 
+    public void updateAllTeacherDashboards(){
+        teacherRepository.findAll().forEach(teacher -> {
+            teacher.getCourseExecutions().forEach(courseExecution -> {
+                getTeacherDashboard(courseExecution.getId(), teacher.getId());
+            });
+        });
+        for (TeacherDashboard teacherDashboard : teacherDashboardRepository.findAll()) {
+            teacherDashboard.update();
+        }
+    }
+
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public void removeTeacherDashboard(Integer dashboardId) {
         if (dashboardId == null)

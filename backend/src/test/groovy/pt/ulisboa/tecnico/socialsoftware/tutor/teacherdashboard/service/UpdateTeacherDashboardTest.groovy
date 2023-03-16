@@ -32,28 +32,11 @@ class UpdateTeacherDashboardTest extends SpockTest {
 
         and: "a change on the dashboard's stats"
         def teacherDashboard = teacherDashboardRepository.findAll().get(0)
-        // def studentStats = new StudentStats(teacherDashboard, externalCourseExecution)
-        // studentStatsRepository.save(studentStats)
-        // teacherDashboard.addStudentStats(studentStats)
-
-        // teacherDashboard.addStudentStats(studentStats)
-        // studentStatsRepository.save(studentStats)
-        // def studentStats = teacherDashboard.getStudentStats().get(0)
-        // studentStats.setNumStudents(3)
-        // studentStats.setNumMore75CorrectQuestions(2)
-        // studentStats.setNumAtLeast3Quizzes(1)
-        // ((AuthTecnicoUser)student.authUser).setEnrolledCoursesAcronyms(externalCourseExecution.getAcronym())
 
         when: "a dashboard is updated"
         def student = new Student(USER_1_NAME, false)
         userRepository.save(student)
         externalCourseExecution.addUser(student)
-        assert externalCourseExecution.getYear() == 2019
-        // assert studentStats.getNumStudents() == 3
-        // assert studentStats.getNumMore75CorrectQuestions() == 2
-        // assert studentStats.getNumAtLeast3Quizzes() == 1
-        // assert teacherDashboardDto.getNumStudents() == 3
-        // assert teacherDashboard.getStudentStats().get(0).getNumStudents() == 0
         teacherDashboardService.updateTeacherDashboard(teacherDashboard.getId())
         teacherDashboardDto = teacherDashboardService.getTeacherDashboard(externalCourseExecution.getId(), teacher.getId())
 
@@ -69,13 +52,6 @@ class UpdateTeacherDashboardTest extends SpockTest {
         teacherDashboardDto.getNumStudents() == [1,]
         teacherDashboardDto.getnumMore75CorrectQuestions() == [0,]
         teacherDashboardDto.getnumAtLeast3Quizes() == [0,]
-        // result.getId() != 0
-        // result.getCourseExecution().getId() == externalCourseExecution.getId()
-        // result.getTeacher().getId() == teacher.getId()
-
-        // and: "the teacher has a reference for the dashboard"
-        // teacher.getDashboards().size() == 1
-        // teacher.getDashboards().contains(result)
     }
 
     @TestConfiguration

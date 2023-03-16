@@ -79,10 +79,6 @@ public class TeacherDashboardService {
                                             .filter( ce -> ce.getCourse() == courseExecution.getCourse())
                                             .sorted((ss1, ss2) -> ss2.getAcademicTerm().compareTo(ss1.getAcademicTerm()))
                                             .limit(3).collect(Collectors.toList());
-        
-        System.out.println("size: " + teacherDashboard.getStudentStats().size());
-        System.out.println("size of list: " + coursesFromLast3Years.size());
-
         for(CourseExecution ce : coursesFromLast3Years){
             if(ce.getStudentStats() != null)
                 teacherDashboard.addStudentStats(ce.getStudentStats());
@@ -100,8 +96,12 @@ public class TeacherDashboardService {
     }
 
     public void updateAllTeacherDashboards(){
-        List<TeacherDashboard> teacherDashboards = teacherDashboardRepository.findAll();
-        for (TeacherDashboard teacherDashboard : teacherDashboards) {
+        teacherRepository.findAll().forEach(teacher -> {
+            teacher.getCourseExecutions().forEach(courseExecution -> {
+                getTeacherDashboard(courseExecution.getId(), teacher.getId());
+            });
+        });
+        for (TeacherDashboard teacherDashboard : teacherDashboardRepository.findAll()) {
             teacherDashboard.update();
         }
     }

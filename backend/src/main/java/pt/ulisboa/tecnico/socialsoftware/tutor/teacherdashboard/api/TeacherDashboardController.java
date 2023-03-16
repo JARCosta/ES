@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import pt.ulisboa.tecnico.socialsoftware.tutor.auth.domain.AuthUser;
 import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.dto.TeacherDashboardDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.services.TeacherDashboardService;
+import org.springframework.web.bind.annotation.PutMapping;
 
 import java.security.Principal;
 
@@ -27,6 +28,12 @@ public class TeacherDashboardController {
         int teacherId = ((AuthUser) ((Authentication) principal).getPrincipal()).getUser().getId();
 
         return teacherDashboardService.getTeacherDashboard(courseExecutionId, teacherId);
+    }
+
+    @PutMapping("/teachers/dashboards/update/all")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public void updateAllTacherDashboards() {
+        teacherDashboardService.updateAllTeacherDashboards();
     }
 
 }

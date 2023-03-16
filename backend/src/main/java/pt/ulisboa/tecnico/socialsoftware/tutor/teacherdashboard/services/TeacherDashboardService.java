@@ -1,5 +1,6 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.services;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -7,11 +8,12 @@ import org.springframework.transaction.annotation.Transactional;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.execution.domain.CourseExecution;
 import pt.ulisboa.tecnico.socialsoftware.tutor.execution.repository.CourseExecutionRepository;
-import pt.ulisboa.tecnico.socialsoftware.tutor.studentdashboard.repository.StudentDashboardRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.domain.StudentStats;
+import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.domain.QuestionStats;
 import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.domain.TeacherDashboard;
 import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.dto.TeacherDashboardDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.repository.StudentStatsRepository;
+import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.repository.QuestionStatsRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.repository.TeacherDashboardRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.domain.Teacher;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.repository.TeacherRepository;
@@ -34,6 +36,9 @@ public class TeacherDashboardService {
 
     @Autowired
     private StudentStatsRepository studentStatsRepository;
+
+    @Autowired
+    private QuestionStatsRepository questionStatsRepository;
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public TeacherDashboardDto getTeacherDashboard(int courseExecutionId, int teacherId) {
@@ -72,9 +77,30 @@ public class TeacherDashboardService {
 
     private TeacherDashboardDto createAndReturnTeacherDashboardDto(CourseExecution courseExecution, Teacher teacher) {
         TeacherDashboard teacherDashboard = new TeacherDashboard(courseExecution, teacher);
+
+        teacherDashboard.setQuestionStats(questionStatsRepository.findAllById(null));
+
+        List<QuestionStats> questionStats = new ArrayList<>();
+        for(QuestionStats questionStat : questionStatsRepository.findAll()){
+            if(questionStat.getCourseExecution().getId().equals(courseExecution.getId()))
+                questionStats.add(questionStat);
+            else if(questionStat.getCourseExecution().getYear() == courseExecution.getYear() - 1 )
+                questionStats.add(questionStat);
+            else if(questionStat.getCourseExecution().getYear() == courseExecution.getYear() - 2 )
+                questionStats.add(questionStat);
+        }
+        teacherDashboard.setQuestionStats(questionStats);
+
+
         teacherDashboardRepository.save(teacherDashboard);
 
         return new TeacherDashboardDto(teacherDashboard);
+    }
+
+    public void updateTeacherDashboard(int dashboardId){
+        TeacherDashboard teacherDashboard = teacherDashboardRepository.findById(dashboardId)
+                .orElseThrow(() -> new TutorException(DASHBOARD_NOT_FOUND, dashboardId));
+        teacherDashboard.update();
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
@@ -85,11 +111,19 @@ public class TeacherDashboardService {
         TeacherDashboard teacherDashboard = teacherDashboardRepository.findById(dashboardId).orElseThrow(() -> new TutorException(DASHBOARD_NOT_FOUND, dashboardId));
         
         Iterator<StudentStats> iterator = teacherDashboard.getStudentStats().iterator();
+        Iterator<QuestionStats> iterator2 = teacherDashboard.getQuestionStats().iterator();
 
         while(iterator.hasNext()){
             StudentStats studentStats = iterator.next();
+            iterator.remove();
             studentStats.remove();
             studentStatsRepository.delete(studentStats);
+        }
+        while(iterator2.hasNext()){
+            QuestionStats questionStats = iterator2.next();
+            iterator2.remove();
+            questionStats.remove();
+            questionStatsRepository.delete(questionStats);
         }
         
         teacherDashboard.remove();

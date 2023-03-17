@@ -55,10 +55,7 @@ public class CourseExecution implements DomainEntity {
     
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "courseExecution", orphanRemoval = true)
     private StudentStats studentStats ;
-
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "courseExecution", orphanRemoval = true)
-    private final Set<TeacherDashboard> teacherDashboards = new HashSet<>();
-
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -228,6 +225,10 @@ public class CourseExecution implements DomainEntity {
 
     public void setStudentStats(StudentStats studentStats) {
         this.studentStats = studentStats;
+    }
+
+    public void removeStudentStats(){
+        this.studentStats = null;
     }
 
     @Override

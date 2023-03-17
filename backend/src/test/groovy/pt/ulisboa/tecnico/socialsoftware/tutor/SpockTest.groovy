@@ -12,8 +12,9 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.auth.AuthUserService
 import pt.ulisboa.tecnico.socialsoftware.tutor.auth.dto.AuthPasswordDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.auth.repository.AuthUserRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.studentdashboard.repository.StudentDashboardRepository
-import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.repository.TeacherDashboardRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.repository.QuizStatsRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.repository.StudentStatsRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.repository.TeacherDashboardRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.studentdashboard.repository.DifficultQuestionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.studentdashboard.repository.FailedAnswerRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.studentdashboard.repository.WeeklyScoreRepository
@@ -52,6 +53,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserService
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.repository.UserRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.utils.DateHandler
 import pt.ulisboa.tecnico.socialsoftware.tutor.utils.Mailer
+import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.repository.QuestionStatsRepository;
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -85,10 +87,19 @@ class SpockTest extends Specification {
 
     public static final String COURSE_1_NAME = "Course 1 Name"
     public static final String COURSE_2_NAME = "Course 2 Name"
+    public static final String COURSE_3_NAME = "Course 3 Name" 
+    public static final String COURSE_4_NAME = "Course 4 Name" 
+    public static final String COURSE_5_NAME = "Course 5 Name" 
     public static final String COURSE_1_ACADEMIC_TERM = "1 Semestre 2019/2020"
     public static final String COURSE_2_ACADEMIC_TERM = "2 Semestre 2019/2020"
+    public static final String COURSE_3_ACADEMIC_TERM = "3 Semestre 2019/2020"
+    public static final String COURSE_4_ACADEMIC_TERM = "4 Semestre 2019/2020"
+    public static final String COURSE_5_ACADEMIC_TERM = "5 Semestre 2019/2020"
     public static final String COURSE_1_ACRONYM = "C12"
     public static final String COURSE_2_ACRONYM = "C22"
+    public static final String COURSE_3_ACRONYM = "C32"
+    public static final String COURSE_4_ACRONYM = "C42"
+    public static final String COURSE_5_ACRONYM = "C52"
 
     public static final String TOPIC_1_NAME = "Topic 1 Name"
     public static final String TOPIC_2_NAME = "Topic 2 Name"
@@ -188,6 +199,9 @@ class SpockTest extends Specification {
     TeacherDashboardRepository teacherDashboardRepository
 
     @Autowired
+    QuizStatsRepository quizStatsRepository
+
+    @Autowired
     StudentStatsRepository studentStatsRepository
 
     @Autowired
@@ -276,6 +290,9 @@ class SpockTest extends Specification {
 
     @Autowired
     ReviewRepository reviewRepository
+
+    @Autowired
+    QuestionStatsRepository questionStatsRepository
 
     @Autowired
     UserApplicationalService userServiceApplicational

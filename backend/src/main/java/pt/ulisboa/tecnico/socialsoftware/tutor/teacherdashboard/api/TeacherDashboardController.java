@@ -36,4 +36,17 @@ public class TeacherDashboardController {
         teacherDashboardService.removeTeacherDashboard(dashboardId);
     }
 
+    @GetMapping("/teachers/dashboards/executions/{courseExecutionId}/update/teacher")
+    @PreAuthorize("hasRole('ROLE_TEACHER') and hasPermission(#courseExecutionId, 'EXECUTION.ACCESS')")
+    public void updateTeacherDashboard(Principal principal, @PathVariable int courseExecutionId) {
+        int teacherId = ((AuthUser) ((Authentication) principal).getPrincipal()).getUser().getId();
+        Integer dashboardId = teacherDashboardService.getTeacherDashboard(courseExecutionId, teacherId).getId();
+        teacherDashboardService.updateTeacherDashboard(dashboardId);
+    }
+
+    @GetMapping("/teachers/dashboards/executions/{courseExecutionId}/update/admin")
+    @PreAuthorize("hasRole('ADMIN') and hasPermission(#courseExecutionId, 'EXECUTION.ACCESS')")
+    public void updateAllTeacherDashboard(Principal principal, @PathVariable int courseExecutionId) {
+        teacherDashboardService.updateAllTeacherDashboards();;
+    }
 }

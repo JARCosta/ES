@@ -1,5 +1,11 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.dto;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import pt.ulisboa.tecnico.socialsoftware.tutor.execution.domain.CourseExecution;
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Course;
+import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.domain.QuizStats;
 import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.domain.TeacherDashboard;
 
 import java.util.ArrayList;
@@ -9,6 +15,7 @@ import java.util.ArrayList;
 public class TeacherDashboardDto {
     private Integer id;
     private Integer numberOfStudents;
+    private ArrayList<QuizStatsDto> quizStatsDto;
 
     private ArrayList<Integer> numMore75CorrectQuestions;
     private ArrayList<Integer> numAtLeast3Quizes;
@@ -22,8 +29,7 @@ public class TeacherDashboardDto {
         this.id = teacherDashboard.getId();
         // For the number of students, we consider only active students
         this.numberOfStudents = teacherDashboard.getCourseExecution().getNumberOfActiveStudents();
-
-
+  
         this.numStudents = new ArrayList<>();
         this.numMore75CorrectQuestions = new ArrayList<>();
         this.numAtLeast3Quizes = new ArrayList<>();
@@ -36,7 +42,8 @@ public class TeacherDashboardDto {
 
         });
 
-
+        this.quizStatsDto = new ArrayList<>();
+        createQuizStatsDtos(teacherDashboard);
     }
 
     public Integer getId() {
@@ -67,11 +74,21 @@ public class TeacherDashboardDto {
         return numAtLeast3Quizes;
     }
 
+    public ArrayList<QuizStatsDto> getQuizStatsDto() {
+        return quizStatsDto;
+    }
+
+    private void createQuizStatsDtos(TeacherDashboard teacherDashboard){
+        for(QuizStats qz : teacherDashboard.getQuizStats()){
+            this.quizStatsDto.add(new QuizStatsDto(qz));
+        }
+    }
+
     @Override
     public String toString() {
         return "TeacherDashboardDto{" +
                 "id=" + id +
-                ", numberOfStudents=" + this.getNumberOfStudents() +
-                "}";
+                ", numberOfStudents=" + numberOfStudents +
+                '}';
     }
 }

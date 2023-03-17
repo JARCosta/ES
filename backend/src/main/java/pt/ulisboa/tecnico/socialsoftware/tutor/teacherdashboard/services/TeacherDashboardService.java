@@ -8,9 +8,12 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.execution.domain.CourseExecution;
 import pt.ulisboa.tecnico.socialsoftware.tutor.execution.repository.CourseExecutionRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.domain.StudentStats;
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Course;
+import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.domain.QuizStats;
 import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.domain.TeacherDashboard;
 import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.dto.TeacherDashboardDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.repository.StudentStatsRepository;
+import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.repository.QuizStatsRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.repository.TeacherDashboardRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.domain.Student;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.domain.Teacher;
@@ -36,6 +39,9 @@ public class TeacherDashboardService {
 
     @Autowired
     private StudentStatsRepository studentStatsRepository;
+
+    @Autowired
+    private QuizStatsRepository quizStatsRepository;
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public TeacherDashboardDto getTeacherDashboard(int courseExecutionId, int teacherId) {
@@ -85,25 +91,10 @@ public class TeacherDashboardService {
             else
                 studentStatsRepository.save(new StudentStats(teacherDashboard, ce));
             }
+        
+        setQuizStatsForLast3CourseExecutions(teacherDashboard);
         teacherDashboardRepository.save(teacherDashboard);
         return new TeacherDashboardDto(teacherDashboard);
-    }
-
-    public void updateTeacherDashboard(int dashboardId){
-        TeacherDashboard teacherDashboard = teacherDashboardRepository.findById(dashboardId)
-                .orElseThrow(() -> new TutorException(DASHBOARD_NOT_FOUND, dashboardId));
-        teacherDashboard.update();
-    }
-
-    public void updateAllTeacherDashboards(){
-        teacherRepository.findAll().forEach(teacher -> {
-            teacher.getCourseExecutions().forEach(courseExecution -> {
-                getTeacherDashboard(courseExecution.getId(), teacher.getId());
-            });
-        });
-        for (TeacherDashboard teacherDashboard : teacherDashboardRepository.findAll()) {
-            teacherDashboard.update();
-        }
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
@@ -122,9 +113,48 @@ public class TeacherDashboardService {
             studentStatsRepository.delete(studentStats);
         }
         
+        quizStatsRepository.deleteAll(teacherDashboard.getQuizStats());
+        
+        
         teacherDashboard.remove();
         teacherDashboardRepository.delete(teacherDashboard);
     }
 
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public void updateTeacherDashboard(Integer dashboardId) {
+        if (dashboardId == null)
+            throw new TutorException(DASHBOARD_NOT_FOUND, -1);
+
+        TeacherDashboard teacherDashboard = teacherDashboardRepository.findById(dashboardId).orElseThrow(() -> new TutorException(DASHBOARD_NOT_FOUND, dashboardId));
+        teacherDashboard.update();
+    }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public void updateAllTeacherDashboards() {
+        List<TeacherDashboard> teacherDashboards = teacherDashboardRepository.findAll();
+
+        for (TeacherDashboard teacherDashboard : teacherDashboards) {
+            teacherDashboard.update();
+        }
+    }
+
+    private List<CourseExecution> getLast3CourseExecutions(CourseExecution courseExecution){
+        Course course = courseExecution.getCourse();
+        List<CourseExecution> cexList = new ArrayList<CourseExecution>(course.getCourseExecutions().stream()
+                                        .filter((CourseExecution cex) -> cex.getEndDate() != null 
+                                        && (cex.getEndDate() == courseExecution.getEndDate() || cex.getEndDate().compareTo(courseExecution.getEndDate()) < 0))
+                                        .collect(Collectors.toList()));
+        // order list by enddate of course execution (most recent 1st)
+        cexList.sort((cex1, cex2) -> cex2.getEndDate().compareTo(cex1.getEndDate()));
+        return cexList;
+    }
+
+    private void setQuizStatsForLast3CourseExecutions(TeacherDashboard teacherDashboard){
+        List<CourseExecution> cexList = getLast3CourseExecutions(teacherDashboard.getCourseExecution());
+        for (int i = 0; i < Math.min(cexList.size(), 3); i++) {
+            new QuizStats(teacherDashboard, cexList.get(i));
+        }
+        quizStatsRepository.saveAll(teacherDashboard.getQuizStats());
+    }
 }
 

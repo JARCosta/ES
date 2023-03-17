@@ -38,6 +38,9 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.utils.DateHandler
 
 import spock.lang.Unroll
 
+import javax.swing.text.html.Option
+import java.util.logging.Handler
+
 @DataJpaTest
 class UpdateTeacherDashboardTest extends SpockTest {
     def teacher
@@ -265,10 +268,103 @@ class UpdateTeacherDashboardTest extends SpockTest {
         then: "an exception is thrown"
         def exception = thrown(TutorException)
         exception.getErrorMessage() == ErrorMessage.DASHBOARD_NOT_FOUND
+        teacher = new Teacher(USER_1_NAME, false)
+        userRepository.save(teacher)
+        teacher.addCourse(externalCourseExecution)
     }
 
+    def createQuestion(available=true) {
+        def question = new Question() as Object
+        question.setTitle("Question Title")
+        question.setCourse(externalCourse)
+        if (available == true){
+            question.setStatus(Question.Status.AVAILABLE)
+        }
+        else{
+            question.setStatus(Question.Status.SUBMITTED)
+        }
+        def questionDetails = new MultipleChoiceQuestion() as Object
+        questionDetails.setQuestion(question)
+        question.setQuestionDetails(questionDetails)
+        questionRepository.save(question)
+        questionDetailsRepository.save(questionDetails)
 
-    @Unroll
-    @TestConfiguration
-    static class LocalBeanConfiguration extends BeanConfiguration {}
+        def option = new Option()
+        option.setContent("Option Content")
+        option.setCorrect(true)
+        option.setSequence(0)
+        option.setQuestionDetails(questionDetails)
+        questionDetails.addOption(option)
+        optionRepository.save(option)
+
+        def optionKO = new Option()
+        optionKO.setContent("Option Content")
+        optionKO.setCorrect(false)
+        optionKO.setSequence(1)
+        optionKO.setQuestionDetails(questionDetails)
+        questionDetails.addOption(optionKO)
+        optionRepository.save(optionKO)
+
+        return question
+    }
+
+    def "update a dashboard"() {
+        given: "an empty dashboard for the teacher"
+        def teacherDashboardDto = teacherDashboardService.createTeacherDashboard(externalCourseExecution.getId(), teacher.getId())
+        teacherDashboardDto.setNumberOfStudents(100)
+        teacherDashboardDto.setId(99)
+
+        and: "a change on the dashboard's stats"
+        def teacherDashboard = teacherDashboardRepository.findAll().get(0)
+
+        when: "a dashboard is updated"
+        def student = new Student(USER_1_NAME, false) as Object
+        userRepository.save(student)
+        externalCourseExecution.addUser(student)
+        teacherDashboardService.updateTeacherDashboard(teacherDashboard.getId())
+        teacherDashboardDto = teacherDashboardService.getTeacherDashboard(externalCourseExecution.getId(), teacher.getId())
+
+        then: "the dashboard is updated for the true values"
+        teacherDashboardRepository.count() == 1L
+        def result = teacherDashboardRepository.findAll().get(0)
+        result.getStudentStats().get(0).getNumStudents() == 1
+        result.getStudentStats().get(0).getNumMore75CorrectQuestions() == 0
+        result.getStudentStats().get(0).getNumAtLeast3Quizzes() == 0
+        teacherDashboard.getStudentStats().size() == 1
+        teacherDashboardDto.getId() == 1
+        teacherDashboardDto.getNumberOfStudents() == 0
+        teacherDashboardDto.getNumStudents() == [1,]
+        teacherDashboardDto.getnumMore75CorrectQuestions() == [0,]
+        teacherDashboardDto.getnumAtLeast3Quizes() == [0,]
+    }
+
+    def "update all teacher dashboard"(){
+        given: "an empty dashboard for the teacher"
+        def teacherDashboardDto = teacherDashboardService.createTeacherDashboard(externalCourseExecution.getId(), teacher.getId())
+        teacherDashboardDto.setNumberOfStudents(100)
+        teacherDashboardDto.setId(99)
+
+        and: "a change on the dashboard's stats"
+        def teacherDashboard = teacherDashboardRepository.findAll().get(0)
+
+        when: "a dashboard is updated"
+        def student = new Student(USER_1_NAME, false) as Object
+        userRepository.save(student)
+        externalCourseExecution.addUser(student)
+        teacherDashboardService.updateTeacherDashboard(teacherDashboard.getId())
+        teacherDashboardDto = teacherDashboardService.getTeacherDashboard(externalCourseExecution.getId(), teacher.getId())
+
+        then: "the dashboard is updated for the true values"
+        teacherDashboardRepository.count() == 1L
+        def result = teacherDashboardRepository.findAll().get(0)
+        result.getStudentStats().get(0).getNumStudents() == 1
+        result.getStudentStats().get(0).getNumMore75CorrectQuestions() == 0
+        result.getStudentStats().get(0).getNumAtLeast3Quizzes() == 0
+        teacherDashboard.getStudentStats().size() == 1
+        teacherDashboardDto.getId() == 1
+        teacherDashboardDto.getNumberOfStudents() == 0
+        teacherDashboardDto.getNumStudents() == [1,]
+        teacherDashboardDto.getnumMore75CorrectQuestions() == [0,]
+        teacherDashboardDto.getnumAtLeast3Quizes() == [0,]
+    }
 }

@@ -23,7 +23,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.dto.QuizStatsDto
 
 
 @DataJpaTest
-    class CreateTeacherDashboardTest extends SpockTest {
+class CreateTeacherDashboardTest extends SpockTest {
     def teacher
 
     def setup() {
@@ -74,7 +74,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.dto.QuizStatsDto
         when: "a dashboard is created"
         teacherDashboardService.createTeacherDashboard(externalCourseExecution.getId(), teacher.getId())
 
-        then: "exception is thrown"        
+        then: "exception is thrown"
         def exception = thrown(TutorException)
         exception.getErrorMessage() == ErrorMessage.TEACHER_NO_COURSE_EXECUTION
     }
@@ -104,6 +104,36 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.dto.QuizStatsDto
         where:
         teacherId << [0, 100]
     }
+
+    def "dashboard is created with student stats"(){
+        given: "a teacher in a course execution"
+        teacher.addCourse(externalCourseExecution)
+
+        when: "a dashboard is created"
+        teacherDashboardService.getTeacherDashboard(externalCourseExecution.getId(), teacher.getId())
+
+        then: "an empty dashboard is created"
+
+        teacherDashboardRepository.count() == 1L
+        studentStatsRepository.count() != 0
+    }
+
+
+
+    def "dashboard is created with student stats"(){
+        given: "a teacher in a course execution"
+        teacher.addCourse(externalCourseExecution)
+
+        when: "a dashboard is created"
+        teacherDashboardService.getTeacherDashboard(externalCourseExecution.getId(), teacher.getId())
+
+        then: "an empty dashboard is created"
+
+        teacherDashboardRepository.count() == 1L
+        studentStatsRepository.count() != 0
+    }
+
+
 
     def "dashboard is created with student stats"(){
         given: "a teacher in a course execution"

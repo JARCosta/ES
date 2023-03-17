@@ -10,8 +10,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.domain.TeacherDa
 
 import java.util.ArrayList;
 
- 
-
 public class TeacherDashboardDto {
     private Integer id;
     private Integer numberOfStudents;
@@ -21,6 +19,10 @@ public class TeacherDashboardDto {
     private ArrayList<Integer> numAtLeast3Quizes;
     private ArrayList<Integer> numStudents;
 
+
+    private ArrayList<Integer> numAvailable;
+    private ArrayList<Integer> answeredQuestionUnique;
+    private ArrayList<Float> averageQuestionAnswered;
 
     public TeacherDashboardDto() {
     }
@@ -44,6 +46,17 @@ public class TeacherDashboardDto {
 
         this.quizStatsDto = new ArrayList<>();
         createQuizStatsDtos(teacherDashboard);
+
+        this.numAvailable = new ArrayList<>();
+        this.answeredQuestionUnique = new ArrayList<>();
+        this.averageQuestionAnswered = new ArrayList<>();
+
+        teacherDashboard.getQuestionStats().forEach(questionStat -> {
+
+            this.numAvailable.add(questionStat.getNumAvailable());
+            this.answeredQuestionUnique.add(questionStat.getAnsweredQuestionsUnique());
+            this.averageQuestionAnswered.add(questionStat.getAverageQuestionsAnswered());
+        });
     }
 
     public Integer getId() {
@@ -84,6 +97,31 @@ public class TeacherDashboardDto {
         }
     }
 
+    public ArrayList<Integer> getnumAvailable() {
+        return numAvailable;
+    }
+
+    public void setNumAvailable(ArrayList<Integer> numAvailable) {
+        this.numAvailable = numAvailable;
+    }
+
+    public ArrayList<Integer> getAnsweredQuestionUnique() {
+        return answeredQuestionUnique;
+    }
+
+    public void setAnsweredQuestionsUnique(ArrayList<Integer> answeredQuestionUnique) {
+        this.answeredQuestionUnique = answeredQuestionUnique;
+    }
+
+    public ArrayList<Float> getAverageQuestionAnswered() {
+        return averageQuestionAnswered;
+    }
+
+    public void setAverageQuestionsAnswered(ArrayList<Float> averageQuestionAnswered) {
+        this.averageQuestionAnswered = averageQuestionAnswered;
+    }
+
+
     @Override
     public String toString() {
         return "TeacherDashboardDto{" +
@@ -91,6 +129,9 @@ public class TeacherDashboardDto {
                 ", numberOfStudents=" + numberOfStudents +
                 ", numStudents=" + numStudents +
                 ", numMore75CorrectQuestions=" + numMore75CorrectQuestions +
+                ", numAvailable=" + this.getnumAvailable() +
+                ", answeredQuestionUnique=" + this.getAnsweredQuestionUnique() +
+                ", averageQuestionAnswered=" + this.getAverageQuestionAnswered() +
                 ", numAtLeast3Quizes=" + numAtLeast3Quizes +
                 '}';
     }

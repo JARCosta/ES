@@ -299,10 +299,14 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.dto.QuizStatsDto
         def result = dashboard.toString()
             
         then: "the result is correct"
-        result == "TeacherDashboardDto{" +
+        def tostr = "TeacherDashboardDto{" +
                 "id=" + dashboard.getId() +
                 ", numberOfStudents=" + dashboard.getNumberOfStudents() +
+                ", numStudents=" + dashboard.getNumStudents() +
+                ", numMore75CorrectQuestions=" + dashboard.getnumMore75CorrectQuestions() +
+                ", numAtLeast3Quizes=" + dashboard.getnumAtLeast3Quizes() +
                 '}'
+        result == tostr
     }
 
 

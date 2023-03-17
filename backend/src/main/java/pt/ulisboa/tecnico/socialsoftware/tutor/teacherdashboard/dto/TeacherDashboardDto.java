@@ -10,7 +10,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.domain.TeacherDa
 
 import java.util.ArrayList;
 
-
+ 
 
 public class TeacherDashboardDto {
     private Integer id;
@@ -92,7 +92,6 @@ public class TeacherDashboardDto {
                 ", numStudents=" + numStudents +
                 ", numMore75CorrectQuestions=" + numMore75CorrectQuestions +
                 ", numAtLeast3Quizes=" + numAtLeast3Quizes +
-                ", quizStatsDto=" + quizStatsDto +
                 '}';
     }
 }

@@ -131,8 +131,14 @@ public class TeacherDashboardService {
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public void updateAllTeacherDashboards() {
-        List<TeacherDashboard> teacherDashboards = teacherDashboardRepository.findAll();
+        teacherRepository.findAll().forEach(teacher -> {
+            teacher.getCourseExecutions().forEach(courseExecution -> {
+                getTeacherDashboard(courseExecution.getId(), teacher.getId());
+            });
+        });
 
+        List<TeacherDashboard> teacherDashboards = teacherDashboardRepository.findAll();
+        
         for (TeacherDashboard teacherDashboard : teacherDashboards) {
             teacherDashboard.update();
         }

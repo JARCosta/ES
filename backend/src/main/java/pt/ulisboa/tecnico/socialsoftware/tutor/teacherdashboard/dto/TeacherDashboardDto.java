@@ -89,6 +89,10 @@ public class TeacherDashboardDto {
         return "TeacherDashboardDto{" +
                 "id=" + id +
                 ", numberOfStudents=" + numberOfStudents +
+                ", numStudents=" + numStudents +
+                ", numMore75CorrectQuestions=" + numMore75CorrectQuestions +
+                ", numAtLeast3Quizes=" + numAtLeast3Quizes +
+                ", quizStatsDto=" + quizStatsDto +
                 '}';
     }
 }

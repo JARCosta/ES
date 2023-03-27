@@ -1,66 +1,64 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.dto;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-
 import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.domain.QuizStats;
 
-public class QuizStatsDto implements Serializable{
-    private Integer id;
-
-    private Integer numQuizzes;
-    private Integer numUniqueAnsweredQuizzes;
-    private Float averageQuizzesSolved;
-
-    public QuizStatsDto() {
-    }
+public class QuizStatsDto {
+    private int numQuizzes;
+    private int numUniqueAnsweredQuizzes;
+    private float averageQuizzesSolved;
+    private int courseExecutionYear;
 
     public QuizStatsDto(QuizStats quizStats) {
-        setId(quizStats.getId());
-        setNumQuizzes(quizStats.getNumQuizzes());
-        setNumUniqueAnsweredQuizzes(quizStats.getNumUniqueAnsweredQuizzes());
-        setAverageQuizzesSolved(quizStats.getAverageQuizzesSolved());
+        this.numQuizzes = quizStats.getNumQuizzes();
+        this.numUniqueAnsweredQuizzes = quizStats.getNumUniqueAnsweredQuizzes();
+        this.averageQuizzesSolved = quizStats.getAverageQuizzesSolved();
+
+        /*
+         * The course execution is guaranteed to have year here, so we
+         * do not catch the exception in this place
+         */
+        this.courseExecutionYear = quizStats.getCourseExecution().getYear();
     }
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Integer getNumQuizzes() {
+    public int getNumQuizzes() {
         return numQuizzes;
     }
 
-    public void setNumQuizzes(Integer numQuizzes) {
+    public void setNumQuizzes(int numQuizzes) {
         this.numQuizzes = numQuizzes;
     }
 
-    public Integer getNumUniqueAnsweredQuizzes() {
+    public int getNumUniqueAnsweredQuizzes() {
         return numUniqueAnsweredQuizzes;
     }
 
-    public void setNumUniqueAnsweredQuizzes(Integer numUniqueAnsweredQuizzes) {
+    public void setNumUniqueAnsweredQuizzes(int numUniqueAnsweredQuizzes) {
         this.numUniqueAnsweredQuizzes = numUniqueAnsweredQuizzes;
     }
 
-    public Float getAverageQuizzesSolved() {
+    public float getAverageQuizzesSolved() {
         return averageQuizzesSolved;
     }
 
-    public void setAverageQuizzesSolved(Float averageQuizzesSolved) {
+    public void setAverageQuizzesSolved(float averageQuizzesSolved) {
         this.averageQuizzesSolved = averageQuizzesSolved;
+    }
+
+    public int getCourseExecutionYear() {
+        return courseExecutionYear;
+    }
+
+    public void setCourseExecutionYear(int courseExecutionYear) {
+        this.courseExecutionYear = courseExecutionYear;
     }
 
     @Override
     public String toString() {
         return "QuizStatsDto{" +
-                "id=" + id +
-                ", numQuizzes=" + numQuizzes +
+                "numQuizzes=" + numQuizzes +
                 ", numUniqueAnsweredQuizzes=" + numUniqueAnsweredQuizzes +
                 ", averageQuizzesSolved=" + averageQuizzesSolved +
-                '}';
+                ", courseExecutionYear=" + courseExecutionYear +
+                "}";
     }
 }

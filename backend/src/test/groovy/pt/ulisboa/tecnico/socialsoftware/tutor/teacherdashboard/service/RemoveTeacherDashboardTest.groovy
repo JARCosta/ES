@@ -5,10 +5,12 @@ import org.springframework.boot.test.context.TestConfiguration
 import pt.ulisboa.tecnico.socialsoftware.tutor.BeanConfiguration
 import pt.ulisboa.tecnico.socialsoftware.tutor.SpockTest
 import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.domain.TeacherDashboard
+import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.domain.QuestionStats
+import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.domain.StudentStats
+import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.domain.QuizStats
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.domain.Teacher
-import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.domain.QuizStats
 import spock.lang.Unroll
 
 @DataJpaTest
@@ -37,8 +39,61 @@ class RemoveTeacherDashboardTest extends SpockTest {
         teacherDashboardService.removeTeacherDashboard(dashboard.getId())
 
         then: "the dashboard is removed"
-        teacherDashboardRepository.findAll().size() == 0L
+        teacherDashboardRepository.findAll().size() == 0
         teacher.getDashboards().size() == 0
+    }
+
+    def "remove a dashboard and check that the associated quiz stats are also removed"() {
+        given: "a dashboard"
+        def dashboard = createTeacherDashboard()
+
+        and: "a quiz stats associated with the dashboard"
+        def quizStats = new QuizStats(dashboard, externalCourseExecution)
+        quizStatsRepository.save(quizStats)
+
+        when: "the user removes the dashboard"
+        teacherDashboardService.removeTeacherDashboard(dashboard.getId())
+
+        then: "the dashboard is removed"
+        teacherDashboardRepository.findAll().size() == 0
+        teacher.getDashboards().size() == 0
+
+        and: "quiz stats have been deleted"
+        quizStatsRepository.findAll().size() == 0
+    }
+
+    def "remove a dashboard and check that the associated student statistics are also removed"() {
+        given: "a dashboard with student statistics"
+        def dashboard = createTeacherDashboard()
+        def studentStats = new StudentStats(dashboard, externalCourseExecution)
+        studentStatsRepository.save(studentStats)
+
+        when: "the user removes the dashboard"
+        teacherDashboardService.removeTeacherDashboard(dashboard.getId())
+
+        then: "the dashboard is removed"
+        teacherDashboardRepository.findAll().size() == 0
+        teacher.getDashboards().size() == 0
+        
+        and: "the student statistics are removed"
+        studentStatsRepository.findAll().size() == 0
+    }
+
+    def "remove a dashboard and check that the associated question statistics are also removed"() {
+        given: "a dashboard with question statistics"
+        def dashboard = createTeacherDashboard()
+        def questionStats = new QuestionStats(dashboard, externalCourseExecution)
+        questionStatsRepository.save(questionStats)
+
+        when: "the user removes the dashboard"
+        teacherDashboardService.removeTeacherDashboard(dashboard.getId())
+
+        then: "the dashboard is removed"
+        teacherDashboardRepository.findAll().size() == 0
+        teacher.getDashboards().size() == 0
+
+        and: "the question statistics are removed"
+        questionStatsRepository.findAll().size() == 0
     }
 
     def "cannot remove a dashboard twice"() {
@@ -49,7 +104,7 @@ class RemoveTeacherDashboardTest extends SpockTest {
         when: "the dashboard is removed for the second time"
         teacherDashboardService.removeTeacherDashboard(dashboard.getId())
 
-        then: "an exception is thrown"        
+        then: "an exception is thrown"
         def exception = thrown(TutorException)
         exception.getErrorMessage() == ErrorMessage.DASHBOARD_NOT_FOUND
     }
@@ -66,80 +121,6 @@ class RemoveTeacherDashboardTest extends SpockTest {
         where:
         dashboardId << [null, 10, -1]
     }
-
-    def "removes the statistics on teacher dashboard when its removed"(){
-        given: "a dashboard"
-        teacher.addCourse(externalCourseExecution)
-        teacherDashboardService.getTeacherDashboard(externalCourseExecution.getId(),teacher.getId())
-
-        when: "the user removes the dashboard"
-        assert studentStatsRepository.count() == 1
-        assert teacherDashboardRepository.count() == 1
-        assert teacher.getDashboards().size() == 1
-        assert teacherDashboardRepository.findAll().get(0).getStudentStats().size() == 1
-        assert teacherDashboardRepository.findAll().get(0).getTeacher() == teacher
-        teacherDashboardService.removeTeacherDashboard(teacherDashboardRepository.findAll().get(0).getId())
-
-        then: "the statistics are removed"
-        teacherDashboardRepository.count() == 0
-        teacher.getDashboards().size() == 0
-        studentStatsRepository.count() == 0
-        
-    }
-
-    @Unroll
-    def "remove dashboard that has 1 quizStat associated with it"() {
-        given: "a teacher dashboard with quizStats"
-        def dashboard = createTeacherDashboard()
-        def quizStats = new QuizStats()
-        quizStatsRepository.save(quizStats)
-        dashboard.addQuizStats(quizStats)
-        teacherDashboardRepository.save(dashboard)
-
-        when: "the dashboard is removed"
-        teacherDashboardService.removeTeacherDashboard(dashboard.getId())
-
-        then: "the dashboard is removed"
-        teacherDashboardRepository.findAll().size() == 0L
-        teacher.getDashboards().size() == 0
-        quizStatsRepository.count() == 0L
-    }
-
-    @Unroll
-    def "remove dashboard that has 2 quizStats associated with it"() {
-        given: "a teacher dashboard with quizStats"
-        def dashboard = createTeacherDashboard()
-        def quizStats1 = new QuizStats()
-        quizStatsRepository.save(quizStats1)
-        dashboard.addQuizStats(quizStats1)
-        def quizStats2 = new QuizStats()
-        quizStatsRepository.save(quizStats2)
-        dashboard.addQuizStats(quizStats2)
-        teacherDashboardRepository.save(dashboard)
-
-        when: "the dashboard is removed"
-        teacherDashboardService.removeTeacherDashboard(dashboard.getId())
-
-        then: "the dashboard is removed"
-        teacherDashboardRepository.findAll().size() == 0L
-        teacher.getDashboards().size() == 0
-        quizStatsRepository.count() == 0L
-    }
-
-    @Unroll
-    def "remove dashboard that doesn't have any quizStats associated with it"() {
-        given: "a teacher dashboard with quizStats"
-        def dashboard = createTeacherDashboard()
-
-        when: "the dashboard is removed"
-        teacherDashboardService.removeTeacherDashboard(dashboard.getId())
-
-        then: "the dashboard is removed"
-        teacherDashboardRepository.findAll().size() == 0L
-        teacher.getDashboards().size() == 0
-        quizStatsRepository.count() == 0L
-    }
-
 
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}

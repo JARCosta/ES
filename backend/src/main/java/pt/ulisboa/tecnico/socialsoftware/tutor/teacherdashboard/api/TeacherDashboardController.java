@@ -6,6 +6,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pt.ulisboa.tecnico.socialsoftware.tutor.auth.domain.AuthUser;
 import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.dto.TeacherDashboardDto;
@@ -30,23 +31,21 @@ public class TeacherDashboardController {
         return teacherDashboardService.getTeacherDashboard(courseExecutionId, teacherId);
     }
 
-    @DeleteMapping("/teachers/dashboards/{dashboardId}")
-    @PreAuthorize("hasRole('ROLE_TEACHER') and hasPermission(#dashboardId, 'TEACHER_DASHBOARD.ACCESS')")
-    public void removeTeacherDashboard(@PathVariable int dashboardId) {
-        teacherDashboardService.removeTeacherDashboard(dashboardId);
-    }
-
-    @GetMapping("/teachers/dashboards/executions/{courseExecutionId}/update/teacher")
-    @PreAuthorize("hasRole('ROLE_TEACHER') and hasPermission(#courseExecutionId, 'EXECUTION.ACCESS')")
-    public void updateTeacherDashboard(Principal principal, @PathVariable int courseExecutionId) {
-        int teacherId = ((AuthUser) ((Authentication) principal).getPrincipal()).getUser().getId();
-        Integer dashboardId = teacherDashboardService.getTeacherDashboard(courseExecutionId, teacherId).getId();
+    @PutMapping("/teachers/dashboards/{dashboardId}")
+    @PreAuthorize("hasRole('ROLE_TEACHER') and hasPermission(#dashboardId, 'TEACHER.DASHBOARD.ACCESS')")
+    public void updateTeacherDashboard(@PathVariable int dashboardId) {
         teacherDashboardService.updateTeacherDashboard(dashboardId);
     }
 
-    @GetMapping("/teachers/dashboards/executions/{courseExecutionId}/update/admin")
-    @PreAuthorize("hasRole('ADMIN') and hasPermission(#courseExecutionId, 'EXECUTION.ACCESS')")
-    public void updateAllTeacherDashboard(Principal principal, @PathVariable int courseExecutionId) {
-        teacherDashboardService.updateAllTeacherDashboards();;
+    @PutMapping("/teachers/dashboards/update")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public void updateAllTeacherDashboards() {
+        teacherDashboardService.updateAllTeacherDashboards();
+    }
+
+    @DeleteMapping("/teachers/dashboards/{dashboardId}")
+    @PreAuthorize("hasRole('ROLE_TEACHER') and hasPermission(#dashboardId, 'TEACHER.DASHBOARD.ACCESS')")
+    public void removeTeacherDashboard(@PathVariable int dashboardId) {
+        teacherDashboardService.removeTeacherDashboard(dashboardId);
     }
 }

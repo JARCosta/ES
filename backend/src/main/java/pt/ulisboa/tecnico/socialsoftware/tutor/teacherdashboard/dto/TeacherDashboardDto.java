@@ -1,49 +1,33 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.dto;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import pt.ulisboa.tecnico.socialsoftware.tutor.execution.domain.CourseExecution;
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Course;
-import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.domain.QuizStats;
 import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.domain.TeacherDashboard;
 
-import java.util.ArrayList;
-
- 
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class TeacherDashboardDto {
     private Integer id;
-    private Integer numberOfStudents;
-    private ArrayList<QuizStatsDto> quizStatsDto;
-
-    private ArrayList<Integer> numMore75CorrectQuestions;
-    private ArrayList<Integer> numAtLeast3Quizes;
-    private ArrayList<Integer> numStudents;
-
+    private List<StudentStatsDto> studentStats;
+    private List<QuizStatsDto> quizStats;
+    private List<QuestionStatsDto> questionStats;
 
     public TeacherDashboardDto() {
     }
 
     public TeacherDashboardDto(TeacherDashboard teacherDashboard) {
         this.id = teacherDashboard.getId();
-        // For the number of students, we consider only active students
-        this.numberOfStudents = teacherDashboard.getCourseExecution().getNumberOfActiveStudents();
-  
-        this.numStudents = new ArrayList<>();
-        this.numMore75CorrectQuestions = new ArrayList<>();
-        this.numAtLeast3Quizes = new ArrayList<>();
 
-        teacherDashboard.getStudentStats().forEach(studentStat -> {
+        this.studentStats = teacherDashboard.getStudentStats().stream()
+                .map(StudentStatsDto::new)
+                .collect(Collectors.toList());
 
-            this.numAtLeast3Quizes.add(studentStat.getNumAtLeast3Quizzes());
-            this.numMore75CorrectQuestions.add(studentStat.getNumMore75CorrectQuestions());
-            this.numStudents.add(studentStat.getNumStudents());
+        this.quizStats = teacherDashboard.getQuizStats().stream()
+                .map(QuizStatsDto::new)
+                .collect(Collectors.toList());
 
-        });
-
-        this.quizStatsDto = new ArrayList<>();
-        createQuizStatsDtos(teacherDashboard);
+        this.questionStats = teacherDashboard.getQuestionStats().stream()
+                .map(QuestionStatsDto::new)
+                .collect(Collectors.toList());
     }
 
     public Integer getId() {
@@ -54,44 +38,37 @@ public class TeacherDashboardDto {
         this.id = id;
     }
 
-    public Integer getNumberOfStudents() {
-        return numberOfStudents;
+    public List<StudentStatsDto> getStudentStats() {
+        return studentStats;
     }
 
-    public void setNumberOfStudents(Integer numberOfStudents) {
-        this.numberOfStudents = numberOfStudents;
+    public void setStudentStats(List<StudentStatsDto> studentStats) {
+        this.studentStats = studentStats;
     }
 
-    public ArrayList<Integer> getNumStudents(){
-        return numStudents;
+    public List<QuizStatsDto> getQuizStats() {
+        return quizStats;
     }
 
-    public ArrayList<Integer> getnumMore75CorrectQuestions(){
-        return numMore75CorrectQuestions;
+    public void setQuizStats(List<QuizStatsDto> quizStats) {
+        this.quizStats = quizStats;
     }
 
-    public ArrayList<Integer> getnumAtLeast3Quizes(){
-        return numAtLeast3Quizes;
+    public List<QuestionStatsDto> getQuestionStats() {
+        return questionStats;
     }
 
-    public ArrayList<QuizStatsDto> getQuizStatsDto() {
-        return quizStatsDto;
-    }
-
-    private void createQuizStatsDtos(TeacherDashboard teacherDashboard){
-        for(QuizStats qz : teacherDashboard.getQuizStats()){
-            this.quizStatsDto.add(new QuizStatsDto(qz));
-        }
+    public void setQuestionStats(List<QuestionStatsDto> questionStats) {
+        this.questionStats = questionStats;
     }
 
     @Override
     public String toString() {
         return "TeacherDashboardDto{" +
                 "id=" + id +
-                ", numberOfStudents=" + numberOfStudents +
-                ", numStudents=" + numStudents +
-                ", numMore75CorrectQuestions=" + numMore75CorrectQuestions +
-                ", numAtLeast3Quizes=" + numAtLeast3Quizes +
-                '}';
+                ", studentStats=" + studentStats +
+                ", quizStats=" + quizStats +
+                ", questionStats=" + questionStats +
+                "}";
     }
 }

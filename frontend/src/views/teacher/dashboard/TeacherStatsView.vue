@@ -3,11 +3,75 @@
     <h2>Statistics for this course execution</h2>
     <div v-if="teacherDashboard != null" class="stats-container">
       <div class="items">
-        <div ref="totalStudents" class="icon-wrapper">
-          <animated-number :number="teacherDashboard.numberOfStudents" />
+        <div ref="numStudents" class="icon-wrapper">
+          <animated-number :number="teacherDashboard.numStudents" />
         </div>
         <div class="project-name">
           <p>Number of Students</p>
+        </div>
+      </div>
+      <div class="items">
+        <div ref="numMore75CorrectQuestions" class="icon-wrapper">
+          <animated-number :number="teacherDashboard.numMore75CorrectQuestions" />
+        </div>
+        <div class="project-name">
+          <p>Number of Students who Solved >= 75% Questions</p>
+        </div>
+      </div>
+      <div class="items">
+        <div ref="numAtLeast3Quizzes" class="icon-wrapper">
+          <animated-number :number="teacherDashboard.numAtLeast3Quizzes" />
+        </div>
+        <div class="project-name">
+          <p>Number of Students who Solved >= 3 Quizzes</p>
+        </div>
+      </div>
+      <div class="items">
+        <div ref="numQuizzes" class="icon-wrapper">
+          <animated-number :number="teacherDashboard.numQuizzes" />
+        </div>
+        <div class="project-name">
+          <p>Number of Quizzes</p>
+        </div>
+      </div>
+      <div class="items">
+        <div ref="numUniqueAnsweredQuizzes" class="icon-wrapper">
+          <animated-number :number="teacherDashboard.numUniqueAnsweredQuizzes" />
+        </div>
+        <div class="project-name">
+          <p>Number of Quizzes Solved (Unique)</p>
+        </div>
+      </div>
+      <div class="items">
+        <div ref="averageQuizzesSolved" class="icon-wrapper">
+          <animated-number :number="teacherDashboard.averageQuizzesSolved" />
+        </div>
+        <div class="project-name">
+          <p>Number of Quizzes Solved (Unique, Average Per Student)</p>
+        </div>
+      </div>
+      <div class="items">
+        <div ref="numAvailable" class="icon-wrapper">
+          <animated-number :number="teacherDashboard.numAvailable" />
+        </div>
+        <div class="project-name">
+          <p>Number of Questions</p>
+        </div>
+      </div>
+      <div class="items">
+        <div ref="answeredQuestionsUnique" class="icon-wrapper">
+          <animated-number :number="teacherDashboard.answeredQuestionsUnique" />
+        </div>
+        <div class="project-name">
+          <p>Number of Questions Solves (Unique)</p>
+        </div>
+      </div>
+      <div class="items">
+        <div ref="averageQuestionsAnswered" class="icon-wrapper">
+          <animated-number :number="teacherDashboard.averageQuestionsAnswered" />
+        </div>
+        <div class="project-name">
+          <p>Number of Questions Correctly Solved (Unique, Average Per Student)</p>
         </div>
       </div>
     </div>

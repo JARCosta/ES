@@ -183,15 +183,15 @@ export default class RemoteServices {
 
   static async getTeacherDashboard(): Promise<TeacherDashboard> {
     return httpClient
-        .get(
-            `/teachers/dashboards/executions/${Store.getters.getCurrentCourse.courseExecutionId}`
-        )
-        .then((response) => {
-          return new TeacherDashboard(response.data);
-        })
-        .catch(async (error) => {
-          throw Error(await this.errorMessage(error));
-        });
+      .get(
+        `/teachers/dashboards/executions/${Store.getters.getCurrentCourse.courseExecutionId}`
+      )
+      .then((response) => {
+        return new TeacherDashboard(response.data);
+      })
+      .catch(async (error) => {
+        throw Error(await this.errorMessage(error));
+      });
   }
 
   static async getUserDashboard(): Promise<StudentDashboard> {

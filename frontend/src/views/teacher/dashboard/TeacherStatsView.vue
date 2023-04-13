@@ -3,7 +3,7 @@
     <h2>Statistics for this course execution</h2>
     <div v-if="teacherDashboard != null" class="stats-container">
       <div class="items">
-        <div ref="numStudents" class="icon-wrapper">
+        <div ref="numStudents" class="icon-wrapper" data-cy="numStudents">
           <animated-number
             :number="teacherDashboard.studentStats[0].numStudents"
           />
@@ -13,7 +13,7 @@
         </div>
       </div>
       <div class="items">
-        <div ref="numMore75CorrectQuestions" class="icon-wrapper">
+        <div ref="numMore75CorrectQuestions" class="icon-wrapper" data-cy="numMore75CorrectQuestions">
           <animated-number
             :number="teacherDashboard.studentStats[0].numMore75CorrectQuestions"
           />
@@ -23,7 +23,7 @@
         </div>
       </div>
       <div class="items">
-        <div ref="numAtLeast3Quizzes" class="icon-wrapper">
+        <div ref="numAtLeast3Quizzes" class="icon-wrapper" data-cy="numAtLeast3Quizzes">
           <animated-number
             :number="teacherDashboard.studentStats[0].numAtLeast3Quizzes"
           />
@@ -95,7 +95,7 @@
     </div>
     <h2> Comparison with previous course executions </h2>
     <div class = "stats-container">
-      <div v-if="teacherDashboard != null" class="bar-chart">
+      <div v-if="teacherDashboard != null" class="bar-chart" data-cy="studentStatsChart">
       <bar-chart
         :chartData="{
           labels : teacherDashboard.studentStats.map(

@@ -211,3 +211,11 @@ Cypress.Commands.add('getDemoCourseExecutionId', () => {
     credentials: credentials,
   });
 });
+
+Cypress,Commands.add('updateStudentsStat', (numStudents, numMore75CorrectQuestions, numAtLeast3Quizzes) => {
+
+  //TODO JAR
+
+}
+
+)

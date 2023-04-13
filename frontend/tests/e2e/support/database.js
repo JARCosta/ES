@@ -211,3 +211,33 @@ Cypress.Commands.add('getDemoCourseExecutionId', () => {
     credentials: credentials,
   });
 });
+
+Cypress.Command.add('createStudentStats', () => {
+  dbCommand(`
+            UPDATE student_stats 
+            SET num_at_least3quizzes = 13, 
+            num_more75correct_questions = 13,
+            num_students = 13,
+            WHERE id IN (1, 2, 3, 4, 5);
+          `);
+});
+  
+Cypress.Command.add('createQuizStats', () => {
+  dbCommand(`
+            UPDATE quiz_stats 
+            SET average_quizzes_solved = 13, 
+            num_quizzes = 13,
+            num_unique_answered_quizzes = 13,
+            WHERE id IN (1, 2, 3, 4, 5);
+          `);
+});
+  
+Cypress.Command.add('createQuestionStats', () => {
+  dbCommand(`
+            UPDATE quiz_stats 
+            SET answered_questions_unique = 13, 
+            average_questions_answered = 13,
+            num_available = 13,
+            WHERE id IN (1, 2, 3, 4, 5);
+          `);
+});

@@ -2,34 +2,32 @@ package pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.dto;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.domain.TeacherDashboard;
 
-import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class TeacherDashboardDto {
     private Integer id;
-    private Integer numberOfStudents;
-
-    private ArrayList<Integer> numAvailable;
-    private ArrayList<Integer> answeredQuestionUnique;
-    private ArrayList<Float> averageQuestionAnswered;
+    private List<StudentStatsDto> studentStats;
+    private List<QuizStatsDto> quizStats;
+    private List<QuestionStatsDto> questionStats;
 
     public TeacherDashboardDto() {
     }
 
     public TeacherDashboardDto(TeacherDashboard teacherDashboard) {
         this.id = teacherDashboard.getId();
-        // For the number of students, we consider only active students
-        this.numberOfStudents = teacherDashboard.getCourseExecution().getNumberOfActiveStudents();
 
-        this.numAvailable = new ArrayList<>();
-        this.answeredQuestionUnique = new ArrayList<>();
-        this.averageQuestionAnswered = new ArrayList<>();
+        this.studentStats = teacherDashboard.getStudentStats().stream()
+                .map(StudentStatsDto::new)
+                .collect(Collectors.toList());
 
-        teacherDashboard.getQuestionStats().forEach(questionStat -> {
+        this.quizStats = teacherDashboard.getQuizStats().stream()
+                .map(QuizStatsDto::new)
+                .collect(Collectors.toList());
 
-            this.numAvailable.add(questionStat.getNumAvailable());
-            this.answeredQuestionUnique.add(questionStat.getAnsweredQuestionsUnique());
-            this.averageQuestionAnswered.add(questionStat.getAverageQuestionsAnswered());
-        });
+        this.questionStats = teacherDashboard.getQuestionStats().stream()
+                .map(QuestionStatsDto::new)
+                .collect(Collectors.toList());
     }
 
     public Integer getId() {
@@ -40,47 +38,37 @@ public class TeacherDashboardDto {
         this.id = id;
     }
 
-    public Integer getNumberOfStudents() {
-        return numberOfStudents;
+    public List<StudentStatsDto> getStudentStats() {
+        return studentStats;
     }
 
-    public void setNumberOfStudents(Integer numberOfStudents) {
-        this.numberOfStudents = numberOfStudents;
+    public void setStudentStats(List<StudentStatsDto> studentStats) {
+        this.studentStats = studentStats;
     }
 
-    public ArrayList<Integer> getnumAvailable() {
-        return numAvailable;
+    public List<QuizStatsDto> getQuizStats() {
+        return quizStats;
     }
 
-    public void setNumAvailable(ArrayList<Integer> numAvailable) {
-        this.numAvailable = numAvailable;
+    public void setQuizStats(List<QuizStatsDto> quizStats) {
+        this.quizStats = quizStats;
     }
 
-    public ArrayList<Integer> getAnsweredQuestionUnique() {
-        return answeredQuestionUnique;
+    public List<QuestionStatsDto> getQuestionStats() {
+        return questionStats;
     }
 
-    public void setAnsweredQuestionsUnique(ArrayList<Integer> answeredQuestionUnique) {
-        this.answeredQuestionUnique = answeredQuestionUnique;
+    public void setQuestionStats(List<QuestionStatsDto> questionStats) {
+        this.questionStats = questionStats;
     }
-
-    public ArrayList<Float> getAverageQuestionAnswered() {
-        return averageQuestionAnswered;
-    }
-
-    public void setAverageQuestionsAnswered(ArrayList<Float> averageQuestionAnswered) {
-        this.averageQuestionAnswered = averageQuestionAnswered;
-    }
-
 
     @Override
     public String toString() {
         return "TeacherDashboardDto{" +
                 "id=" + id +
-                ", numberOfStudents=" + this.getNumberOfStudents() +
-                ", numAvailable=" + this.getnumAvailable() +
-                ", answeredQuestionUnique=" + this.getAnsweredQuestionUnique() +
-                ", averageQuestionAnswered=" + this.getAverageQuestionAnswered() +
+                ", studentStats=" + studentStats +
+                ", quizStats=" + quizStats +
+                ", questionStats=" + questionStats +
                 "}";
     }
 }

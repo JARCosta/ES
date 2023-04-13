@@ -1,6 +1,7 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.dto;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.domain.TeacherDashboard;
+import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.domain.QuestionStats;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -10,6 +11,10 @@ public class TeacherDashboardDto {
     private List<StudentStatsDto> studentStats;
     private List<QuizStatsDto> quizStats;
     private List<QuestionStatsDto> questionStats;
+    private List<Integer> numQuestAvail;
+    private List<Integer> numQuestSolvedUnique;
+    private List<Float> averageQuestSolved;
+    private List<Integer> years;
 
     public TeacherDashboardDto() {
     }
@@ -28,6 +33,13 @@ public class TeacherDashboardDto {
         this.questionStats = teacherDashboard.getQuestionStats().stream()
                 .map(QuestionStatsDto::new)
                 .collect(Collectors.toList());
+        
+        for (QuestionStats QS : teacherDashboard.getQuestionStats()) {
+            years.add(QS.getCourseExecution().getYear());
+            numQuestAvail.add(QS.getNumAvailable());
+            numQuestSolvedUnique.add(QS.getAnsweredQuestionsUnique());
+            averageQuestSolved.add(QS.getAverageQuestionsAnswered());
+        }
     }
 
     public Integer getId() {
@@ -60,6 +72,10 @@ public class TeacherDashboardDto {
 
     public void setQuestionStats(List<QuestionStatsDto> questionStats) {
         this.questionStats = questionStats;
+    }
+
+    public List<Integer> getYears() {
+        return years;
     }
 
     @Override

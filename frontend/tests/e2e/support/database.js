@@ -230,7 +230,25 @@ Cypress.Commands.add('updateStudentStatsInDashboard', (academic_term, num_studen
 })
 
 
-Cypress.Command.add('createStudentStats', () => {
+Cypress.Commands.add('updateStudentStatsInDashboard', (academic_term, num_students, num_more75correct_questions, num_at_least3quizzes) => {
+  dbCommand(`
+        UPDATE student_stats
+        SET num_students = ${num_students}, num_more75correct_questions = ${num_more75correct_questions}, num_at_least3quizzes = ${num_at_least3quizzes}
+        WHERE course_execution_id IN (SELECT id FROM course_executions WHERE academic_term = '${academic_term}');
+    `);
+})
+
+
+Cypress.Commands.add('updateStudentStatsInDashboard', (academic_term, num_students, num_more75correct_questions, num_at_least3quizzes) => {
+  dbCommand(`
+        UPDATE student_stats
+        SET num_students = ${num_students}, num_more75correct_questions = ${num_more75correct_questions}, num_at_least3quizzes = ${num_at_least3quizzes}
+        WHERE course_execution_id IN (SELECT id FROM course_executions WHERE academic_term = '${academic_term}');
+    `);
+})
+
+
+Cypress.Commands.add('createStudentStats', () => {
   dbCommand(`
             UPDATE student_stats 
             SET num_at_least3quizzes = 13, 
@@ -240,7 +258,7 @@ Cypress.Command.add('createStudentStats', () => {
           `);
 });
   
-Cypress.Command.add('createQuizStats', () => {
+Cypress.Commands.add('createQuizStats', () => {
   dbCommand(`
             UPDATE quiz_stats 
             SET average_quizzes_solved = 13, 
@@ -250,7 +268,7 @@ Cypress.Command.add('createQuizStats', () => {
           `);
 });
   
-Cypress.Command.add('createQuestionStats', () => {
+Cypress.Commands.add('createQuestionStats', () => {
   dbCommand(`
             UPDATE quiz_stats 
             SET answered_questions_unique = 13, 

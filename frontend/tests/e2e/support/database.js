@@ -212,10 +212,16 @@ Cypress.Commands.add('getDemoCourseExecutionId', () => {
   });
 });
 
-Cypress,Commands.add('updateStudentsStat', (numStudents, numMore75CorrectQuestions, numAtLeast3Quizzes) => {
+Cypress,Commands.add('updateStudentsStat', (numStudents, numMore75CorrectQuestions, numAtLeast3Quizzes, course_year) => {
 
-  //TODO JAR
-
+  dbCommand(`
+  
+  UPDATE student_stats;
+  SET numStudents =${numStudents}, numMore75CorrectQuestions =${numMore75CorrectQuestions}, numAtLeast3Quizzes =${numAtLeast3Quizzes};
+  WHERE course_execution_id IN (SELECT id FROM course_executions);
+  FROM course_executions WHERE academic_term =${course_year};
+`);
+  
 }
 
 )

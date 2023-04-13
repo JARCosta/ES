@@ -34,7 +34,7 @@ describe('TeacherDashboard', () => {
 
         cy.get('a[href*="/"]').contains('demo course').click();
 
-        cy.updateStudentsStat(88, 99, 111);
+        cy.updateStudentsStat(88, 99, 111, "1st Semester 2019/2020");
 
         cy.get('[data-cy="dashboardMenuButton"]').click();
         cy.wait('@getTeacherDashboard');

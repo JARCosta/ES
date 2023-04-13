@@ -93,7 +93,124 @@
         </div>
       </div>
     </div>
-</div>
+    <h2> Comparison with previous course executions </h2>
+    <div class = "stats-container">
+      <div v-if="teacherDashboard != null" class="bar-chart">
+      <bar-chart
+        :chartData="{
+          labels : teacherDashboard.studentStats.map(
+            (x) => x.courseExecutionYear),
+            
+        datasets: [
+          {
+            label: 'Number of Students',
+            data: teacherDashboard.studentStats.map((x) => x.numStudents),
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 1,
+          },
+          {
+            label: 'Number of Students who Solved >= 75% Questions',
+            data: teacherDashboard.studentStats.map((x) =>
+              x.numMore75CorrectQuestions
+            ),
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1,
+          },
+          {
+            label: 'Number of Students who Solved >= 3 Quizzes',
+            data: teacherDashboard.studentStats.map((x) =>
+              x.numAtLeast3Quizzes
+            ),
+            backgroundColor: 'rgba(255, 206, 86, 0.2)',
+            borderColor: 'rgba(255, 206, 86, 1)',
+            borderWidth: 1,
+          },
+        ],
+      }"
+        :title="'Student Stats'"
+      />       
+    </div> 
+
+    <div v-if="teacherDashboard != null" class="bar-chart">
+      <bar-chart
+        :chartData="{
+          labels : teacherDashboard.quizStats.map(
+            (x) => x.courseExecutionYear),
+            
+        datasets: [
+          {
+            label: 'Quizzes: Total Available',
+            data: teacherDashboard.quizStats.map((x) => x.numQuizzes),
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 1,
+          },
+          {
+            label: 'Quizzes: Solved (Unique)',
+            data: teacherDashboard.quizStats.map((x) =>
+              x.numUniqueAnsweredQuizzes
+            ),
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1,
+          },
+          {
+            label: 'Quizzes: Solved (Unique, Average Per Student)',
+            data: teacherDashboard.quizStats.map((x) =>
+              x.averageQuizzesSolved
+            ),
+            backgroundColor: 'rgba(255, 206, 86, 0.2)',
+            borderColor: 'rgba(255, 206, 86, 1)',
+            borderWidth: 1,
+          },
+        ],
+      }"
+        :title="'Quiz Stats'"
+      />       
+    </div> 
+
+    <div v-if="teacherDashboard != null" class="bar-chart">
+      <bar-chart
+        :chartData="{
+          labels : teacherDashboard.questionStats.map(
+            (x) => x.courseExecutionYear),
+            
+        datasets: [
+          {
+            label: 'Questions: Total Available',
+            data: teacherDashboard.questionStats.map((x) => x.numAvaible),
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 1,
+          },
+          {
+            label: 'Questions: Total Solved (Unique)',
+            data: teacherDashboard.questionStats.map((x) =>
+              x.answeredQuestionsUnique
+            ),
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1,
+          },
+          {
+            label: 'Questions: Correctly Solved (Unique, Average Per Student)',
+            data: teacherDashboard.questionStats.map((x) =>
+              x.averageQuestionsAnswered
+            ),
+            backgroundColor: 'rgba(255, 206, 86, 0.2)',
+            borderColor: 'rgba(255, 206, 86, 1)',
+            borderWidth: 1,
+          },
+        ],
+      }"
+        :title="'Questions Stats'"
+      />       
+    </div> 
+
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
@@ -101,9 +218,10 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 import RemoteServices from '@/services/RemoteServices';
 import AnimatedNumber from '@/components/AnimatedNumber.vue';
 import TeacherDashboard from '@/models/dashboard/TeacherDashboard';
+import BarChart from '@/components/BarChart.vue';
 
 @Component({
-  components: { AnimatedNumber },
+  components: { AnimatedNumber, BarChart }
 })
 
 export default class TeacherStatsView extends Vue {
@@ -120,7 +238,6 @@ export default class TeacherStatsView extends Vue {
     await this.$store.dispatch('clearLoading');
   }
 }
-
 </script>
 
 <style lang="scss" scoped>

@@ -25,6 +25,7 @@
     "showdown": "~2.1.0",
     "typeface-roboto": "~1.1.13",
     "vue": "~2.6.14",
+    "vue-chartjs": "^4.1.2",
     "vue-class-component": "~7.2.6",
     "vue-codemirror": "~4.0.6",
     "vue-ctk-date-time-picker": "~2.5.0",
@@ -136,7 +137,7 @@
       "^.+\\.tsx?$": "ts-jest"
     },
     "transformIgnorePatterns": [
-      "node_modules/(?!(showdown|vue-underscore|vue-ctk-date-time-picker|codemirror|vue-qrcode-reader|vue-qrcode)/)"
+      "node_modules/(?!(showdown|vue-underscore|vue-ctk-date-time-picker|codemirror|vue-qrcode-reader|vue-qrcode|vue-chartjs)/)"
     ]
   },
   "engines": {

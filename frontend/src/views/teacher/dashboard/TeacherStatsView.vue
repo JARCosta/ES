@@ -101,11 +101,11 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import RemoteServices from '@/services/RemoteServices';
 import AnimatedNumber from '@/components/AnimatedNumber.vue';
-import BarChart from '@/components/BarChart.vue';
+import BarChart from '@/components/Chart.vue';
 import TeacherDashboard from '@/models/dashboard/TeacherDashboard';
 
 @Component({
-  components: { AnimatedNumber, Chart },
+  components: { AnimatedNumber, BarChart },
 })
 
 export default class TeacherStatsView extends Vue {
@@ -121,22 +121,22 @@ export default class TeacherStatsView extends Vue {
 
       // Assign the data object and options object for BarChart
       this.barChartData = {
-        labels: ["teacherDashboard.years[0]", "teacherDashboard.years[1]", "teacherDashboard.years[2]"],
+        labels: ['teacherDashboard.years[0]', 'teacherDashboard.years[1]', 'teacherDashboard.years[2]'],
         datasets: [
           {
-            label: "teacherDashboard.numQuestAvail",
-            backgroundColor: "rgba(255,99,132,0.2)",
-            data: teacherDashboard.numQuestAvail
+            label: 'teacherDashboard.numQuestAvail',
+            backgroundColor: 'rgba(255,99,132,0.2)',
+            data: this.teacherDashboard.numQuestAvail
           },
           {
-            label: "teacherDashboard.numQuestSolvedUnique",
-            backgroundColor: "rgba(255,99,132,0.2)",
-            data: teacherDashboard.numQuestSolvedUnique
+            label: 'teacherDashboard.numQuestSolvedUnique',
+            backgroundColor: 'rgba(255,99,132,0.2)',
+            data: this.teacherDashboard.numQuestSolvedUnique
           },
           {
-            label: "teacherDashboard.averageQuestSolved",
-            backgroundColor: "rgba(255,99,132,0.2)",
-            data: teacherDashboard.averageQuestSolved
+            label: 'teacherDashboard.averageQuestSolved',
+            backgroundColor: 'rgba(255,99,132,0.2)',
+            data: this.teacherDashboard.averageQuestSolved
           }
         ]
       };

@@ -4,6 +4,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.domain.TeacherDa
 import pt.ulisboa.tecnico.socialsoftware.tutor.teacherdashboard.domain.QuestionStats;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public class TeacherDashboardDto {
@@ -22,6 +23,10 @@ public class TeacherDashboardDto {
     public TeacherDashboardDto(TeacherDashboard teacherDashboard) {
         this.id = teacherDashboard.getId();
 
+        this.years = new ArrayList<>();
+        this.numQuestAvail = new ArrayList<>();
+        this.numQuestSolvedUnique = new ArrayList<>();
+        this.averageQuestSolved = new ArrayList<>();
         this.studentStats = teacherDashboard.getStudentStats().stream()
                 .map(StudentStatsDto::new)
                 .collect(Collectors.toList());
@@ -33,7 +38,6 @@ public class TeacherDashboardDto {
         this.questionStats = teacherDashboard.getQuestionStats().stream()
                 .map(QuestionStatsDto::new)
                 .collect(Collectors.toList());
-        
         for (QuestionStats QS : teacherDashboard.getQuestionStats()) {
             years.add(QS.getCourseExecution().getYear());
             numQuestAvail.add(QS.getNumAvailable());

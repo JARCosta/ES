@@ -21,6 +21,7 @@
                     v-on="on"
                     @click="selectCourse(course)"
                     :class="course.status.toLowerCase()"
+                    :data-cy="course.academicTerm"
                   >
                     <v-list-item-content>
                       <v-list-item-title>

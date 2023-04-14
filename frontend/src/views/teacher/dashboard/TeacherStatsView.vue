@@ -3,7 +3,7 @@
     <h2>Statistics for this course execution</h2>
     <div v-if="teacherDashboard != null" class="stats-container">
       <div class="items">
-        <div ref="numQuestAvail" class="icon-wrapper">
+        <div ref="numQuestAvail" class="icon-wrapper" data-cy="numStudents">
           <animated-number :number="teacherDashboard.numQuestAvail[0]" />
           <BarChart :chartData="barChartData" :chartOptions="barChartOptions" />
         </div>
@@ -12,7 +12,7 @@
         </div>
       </div>
       <div class="items">
-        <div ref="numQuestSolvedUnique" class="icon-wrapper">
+        <div ref="numQuestSolvedUnique" class="icon-wrapper" data-cy="numMore75CorrectQuestions">
           <animated-number :number="teacherDashboard.numQuestSolvedUnique[0]" />
           <BarChart :chartData="barChartData" :chartOptions="barChartOptions" />
         </div>
@@ -21,7 +21,7 @@
         </div>
       </div>
       <div class="items">
-        <div ref="averageQuestSolved" class="icon-wrapper">
+        <div ref="averageQuestSolved" class="icon-wrapper" data-cy="numAtLeast3Quizzes">
           <animated-number :number="teacherDashboard.averageQuestSolved[0]" />
           <BarChart :chartData="barChartData" :chartOptions="barChartOptions" />
         </div>
@@ -86,7 +86,7 @@
             </div>
         </div>
         <div class="items">
-            <div ref="averageQuestionsAnswered" class="icon-wrapper">
+            <div ref="averageQuestionsAnswered" class="icon-wrapper" data-cy="studentStatsChart">
                 <animated-number :number="teacherDashboard.averageQuestionsAnswered" />
             </div>
             <div class="project-name">

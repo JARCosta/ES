@@ -211,3 +211,10 @@ Cypress.Commands.add('getDemoCourseExecutionId', () => {
     credentials: credentials,
   });
 });
+
+Cypress,Commands.add('updateStudentsStat', (numStudents, numMore75CorrectQuestions, numAtLeast3Quizzes) => {
+    cy.task('queryDatabase', {
+        query: `UPDATE student_dashboard SET num_students = ${numStudents}, num_more_75_correct_questions = ${numMore75CorrectQuestions}, num_at_least_3_quizzes = ${numAtLeast3Quizzes}`,
+        credentials: credentials,
+    });
+}

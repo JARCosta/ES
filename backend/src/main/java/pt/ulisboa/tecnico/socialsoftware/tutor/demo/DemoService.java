@@ -34,6 +34,12 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.repository.TournamentR
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.domain.Student;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.repository.UserRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.utils.DateHandler;
+import pt.ulisboa.tecnico.socialsoftware.tutor.execution.domain.CourseExecution;
+import pt.ulisboa.tecnico.socialsoftware.tutor.auth.dto.AuthDto;
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.domain.User;
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Course;
+import pt.ulisboa.tecnico.socialsoftware.tutor.auth.AuthUserService;
+
 
 import java.util.Arrays;
 import java.util.List;
@@ -95,6 +101,9 @@ public class DemoService {
 
     @Autowired
     private DifficultQuestionRepository difficultQuestionRepository;
+
+    @Autowired
+    private AuthUserService authUserService;
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public void resetDemoDashboards() {
@@ -225,83 +234,55 @@ public class DemoService {
                 });
     }
 
+    // This is an example of how we can change the state associated with the demo teacher
+    // (this method is in DemoService.java;
+    // you will need to also update DemoUtils.java to execute this method with the profile test-int).
+    // It is also possible to add students, questions, and quizzes here.
+    // IMPORTANT NOTE: some existing reset methods and additional reset methods will need to be updated/added
+    // (for example, to delete the newly created course executions).
+    // Otherwise, the database needs to be cleaned before each TutorApplication execution.
+
+
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public void populateDemo() {
         Integer courseId = courseExecutionService.getDemoCourse().getCourseId();
         Integer courseExecutionId = courseExecutionService.getDemoCourse().getCourseExecutionId();
 
-        Topic softwareArchitectureTopic = new Topic();
-        softwareArchitectureTopic.setName("Software Architecture");
-        softwareArchitectureTopic.setCourse(courseRepository.findById(courseId).orElseThrow(() -> new TutorException(ErrorMessage.COURSE_NOT_FOUND)));
-        topicRepository.save(softwareArchitectureTopic);
 
-        Topic softwareEngineeringTopic = new Topic();
-        softwareEngineeringTopic.setName("Software Engineering");
-        softwareEngineeringTopic.setCourse(courseRepository.findById(courseId).orElseThrow(() -> new TutorException(ErrorMessage.COURSE_NOT_FOUND)));
-        topicRepository.save(softwareEngineeringTopic);
+        // Let's update the end date of the demo execution
+        CourseExecution demoExecution = courseExecutionRepository.findById(courseExecutionId)
+                .orElseThrow(() -> new TutorException(ErrorMessage.COURSE_EXECUTION_NOT_FOUND));
+        demoExecution.setEndDate(DateHandler.toLocalDateTime("2017-12-31T10:15:30+01:00[Europe/Lisbon]"));
 
-        List<Question> questions = questionRepository.findQuestions(courseId);
-        questions.forEach(question -> {
-            question.setStatus(Question.Status.AVAILABLE);
-            question.addTopic(softwareEngineeringTopic);
-        });
+        // Simulate login of demo teacher (this adds the demo teacher to the original demo execution
+        AuthDto authDemoTeacherDto = authUserService.demoTeacherAuth();
 
-        Assessment assessment = new Assessment();
-        assessment.setTitle("Software Engineering Questions");
-        assessment.setStatus(Assessment.Status.AVAILABLE);
-        assessment.setSequence(1);
-        assessment.setCourseExecution(courseExecutionRepository.findById(courseExecutionId).orElseThrow(() -> new TutorException(ErrorMessage.COURSE_EXECUTION_NOT_FOUND)));
-        TopicConjunction topicConjunction = new TopicConjunction();
-        topicConjunction.addTopic(softwareEngineeringTopic);
-        topicConjunction.setAssessment(assessment);
-        assessmentRepository.save(assessment);
+        // Get demo course and demo teacher
+        Course demoCourse = courseRepository.findById(courseId)
+                .orElseThrow(() -> new TutorException(ErrorMessage.COURSE_NOT_FOUND));
+        User demoTeacher = userRepository.findById(authDemoTeacherDto.getUser().getId())
+                .orElseThrow(() -> new TutorException(ErrorMessage.USER_NOT_FOUND));
 
-        Quiz inClassOneWayQuiz = new Quiz();
-        inClassOneWayQuiz.setTitle("In Class Quiz One Way");
-        inClassOneWayQuiz.setType(Quiz.QuizType.IN_CLASS.name());
-        inClassOneWayQuiz.setCreationDate(DateHandler.now());
-        inClassOneWayQuiz.setAvailableDate(DateHandler.now());
-        inClassOneWayQuiz.setConclusionDate(DateHandler.now().plusHours(22));
-        inClassOneWayQuiz.setCourseExecution(courseExecutionRepository.findById(courseExecutionId).orElseThrow(() -> new TutorException(ErrorMessage.COURSE_EXECUTION_NOT_FOUND)));
-        inClassOneWayQuiz.setOneWay(true);
-        inClassOneWayQuiz.setScramble(true);
+        // Create three additional course executions
+        List<String> endDates = Arrays.asList(
+                "2019-12-31T10:15:30+01:00[Europe/Lisbon]",
+                "2022-12-31T10:15:30+01:00[Europe/Lisbon]",
+                "2023-12-31T10:15:30+01:00[Europe/Lisbon]"
+        );
+        List<String> academicTerms = Arrays.asList("1st semester 2019/2020", "1st semester 2022/2023",
+                "1st semester 2023/2024");
 
-        Quiz inClassQuiz = new Quiz();
-        inClassQuiz.setTitle("In Class Quiz");
-        inClassQuiz.setType(Quiz.QuizType.IN_CLASS.name());
-        inClassQuiz.setCreationDate(DateHandler.now());
-        inClassQuiz.setAvailableDate(DateHandler.now());
-        inClassQuiz.setConclusionDate(DateHandler.now().plusHours(22));
-        inClassQuiz.setCourseExecution(courseExecutionRepository.findById(courseExecutionId).orElseThrow(() -> new TutorException(ErrorMessage.COURSE_EXECUTION_NOT_FOUND)));
-        inClassQuiz.setScramble(true);
+        for (int i = 0; i < endDates.size(); i++) {
+            CourseExecution newCE = new CourseExecution(
+                    demoCourse,
+                    "Demo Course",
+                    academicTerms.get(i),
+                    Course.Type.TECNICO,
+                    DateHandler.toLocalDateTime(endDates.get(i)));
 
-        Quiz proposedQuiz = new Quiz();
-        proposedQuiz.setTitle("Teacher Proposed");
-        proposedQuiz.setType(Quiz.QuizType.PROPOSED.name());
-        proposedQuiz.setCreationDate(DateHandler.now());
-        proposedQuiz.setAvailableDate(DateHandler.now());
-        proposedQuiz.setCourseExecution(courseExecutionRepository.findById(courseExecutionId).orElseThrow(() -> new TutorException(ErrorMessage.COURSE_EXECUTION_NOT_FOUND)));
-        proposedQuiz.setScramble(true);
+            demoTeacher.addCourse(newCE);
 
-        Quiz scrambledQuiz = new Quiz();
-        scrambledQuiz.setTitle("Non Scrambled");
-        scrambledQuiz.setType(Quiz.QuizType.PROPOSED.name());
-        scrambledQuiz.setCreationDate(DateHandler.now());
-        scrambledQuiz.setAvailableDate(DateHandler.now());
-        scrambledQuiz.setCourseExecution(courseExecutionRepository.findById(courseExecutionId).orElseThrow(() -> new TutorException(ErrorMessage.COURSE_EXECUTION_NOT_FOUND)));
-
-        questions.forEach(question -> {
-            if (questionsInQuizzes.contains(question.getId())) {
-                new QuizQuestion(inClassOneWayQuiz, question, inClassOneWayQuiz.getQuizQuestionsNumber());
-                new QuizQuestion(inClassQuiz, question, inClassQuiz.getQuizQuestionsNumber());
-                new QuizQuestion(proposedQuiz, question, proposedQuiz.getQuizQuestionsNumber());
-                new QuizQuestion(scrambledQuiz, question, scrambledQuiz.getQuizQuestionsNumber());
-            }
-        });
-
-        quizRepository.save(inClassOneWayQuiz);
-        quizRepository.save(inClassQuiz);
-        quizRepository.save(proposedQuiz);
-        quizRepository.save(scrambledQuiz);
+            courseExecutionRepository.save(newCE);
+        }
     }
 }

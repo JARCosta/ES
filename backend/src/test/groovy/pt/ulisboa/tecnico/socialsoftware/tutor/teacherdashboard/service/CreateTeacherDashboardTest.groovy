@@ -10,7 +10,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.user.domain.Teacher
 import spock.lang.Unroll
 
 @DataJpaTest
-    class CreateTeacherDashboardTest extends SpockTest {
+class CreateTeacherDashboardTest extends SpockTest {
     def teacher
 
     def setup() {
@@ -61,7 +61,7 @@ import spock.lang.Unroll
         when: "a dashboard is created"
         teacherDashboardService.createTeacherDashboard(externalCourseExecution.getId(), teacher.getId())
 
-        then: "exception is thrown"        
+        then: "exception is thrown"
         def exception = thrown(TutorException)
         exception.getErrorMessage() == ErrorMessage.TEACHER_NO_COURSE_EXECUTION
     }
@@ -91,6 +91,21 @@ import spock.lang.Unroll
         where:
         teacherId << [0, 100]
     }
+
+    def "dashboard is created with student stats"(){
+        given: "a teacher in a course execution"
+        teacher.addCourse(externalCourseExecution)
+
+        when: "a dashboard is created"
+        teacherDashboardService.getTeacherDashboard(externalCourseExecution.getId(), teacher.getId())
+
+        then: "an empty dashboard is created"
+
+        teacherDashboardRepository.count() == 1L
+        studentStatsRepository.count() != 0
+    }
+
+
 
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}

@@ -5,9 +5,6 @@ import StudentStats from '../management/StudentStats';
 export default class TeacherDashboard {
   id!: number;
   numberOfStudents!: number;
-  numQuestAvail!: number[];
-  numQuestSolvedUnique!: number[];
-  averageQuestSolved!: number[];
   years!: number[];
   numStudents!: number;
   numMore75CorrectQuestions!: number;
@@ -28,9 +25,6 @@ export default class TeacherDashboard {
     if (jsonObj) {
       this.id = jsonObj.id;
       this.numberOfStudents = jsonObj.numberOfStudents;
-      this.numQuestAvail = jsonObj.numQuestAvail;
-      this.numQuestSolvedUnique = jsonObj.numQuestSolvedUnique;
-      this.averageQuestSolved = jsonObj.averageQuestSolved;
       this.years = jsonObj.years
       this.numStudents = jsonObj.numStudents;
       this.numMore75CorrectQuestions = jsonObj.numMore75CorrectQuestions;

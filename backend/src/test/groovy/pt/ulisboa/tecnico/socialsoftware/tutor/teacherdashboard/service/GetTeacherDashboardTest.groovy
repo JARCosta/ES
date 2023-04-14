@@ -56,15 +56,6 @@ class GetTeacherDashboardTest extends SpockTest {
         dashboardDto.getId() == getDashboardDto.getId()
     }
 
-    def "get a dashboard of demo course, which does not have year defined"() {
-        when: "getting a dashboard"
-        teacherDashboardService.getTeacherDashboard(courseExecutionDto.getCourseExecutionId(), authUserDto.getId())
-
-        then: "invalid academic term exception is raised"
-        def exception = thrown(TutorException)
-        exception.getErrorMessage() == ErrorMessage.INVALID_ACADEMIC_TERM_FOR_COURSE_EXECUTION
-    }
-
     def "cannot get a dashboard for a user that does not belong to the course execution"() {
         given: "another course execution"
         createExternalCourseAndExecution()

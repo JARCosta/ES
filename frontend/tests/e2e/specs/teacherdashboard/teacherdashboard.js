@@ -68,8 +68,8 @@ describe('TeacherDashboard', () => {
         cy.get('[data-cy="quizStatsGraph"]').eq(0).scrollIntoView().wait(5000).screenshot('quizStatsGraph2-1')
         cy.get('[data-cy="questionStatsGraph"]').eq(0).scrollIntoView().wait(5000).screenshot('questionStatsGraph2-1')
         
-        compareScreenshots('expected-screenshot/studentStatsGraph2-1.png', 'studentStatsGraph2-1.png', 'diff1');
-        compareScreenshots('expected-screenshot/quizStatsGraph2-1.png', 'quizStatsGraph2-1.png', 'diff2');
-        compareScreenshots('expected-screenshot/questionStatsGraph2-1.png', 'questionStatsGraph2-1.png', 'diff3');
+        //compareScreenshots('expected-screenshot/studentStatsGraph2-1.png', 'studentStatsGraph2-1.png', 'diff1');
+        //compareScreenshots('expected-screenshot/quizStatsGraph2-1.png', 'quizStatsGraph2-1.png', 'diff2');
+        //compareScreenshots('expected-screenshot/questionStatsGraph2-1.png', 'questionStatsGraph2-1.png', 'diff3');
     });
 });

@@ -337,5 +337,6 @@ Cypress.Commands.add('cleanDb' , () => {
               DELETE FROM student_stats;
               DELETE FROM quiz_stats;
               DELETE FROM question_stats;
+              DELETE FROM teacher_dashboard;
   `);
 });

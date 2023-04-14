@@ -1,4 +1,4 @@
-//const pixelmatch = require('pixelmatch');
+const pixelmatch = require('pixelmatch');
 const PNG = require('pngjs').PNG;
 
 function compareScreenshots(name1, name2, diffName) {

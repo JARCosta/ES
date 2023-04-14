@@ -3,7 +3,7 @@
     <h2>Statistics for this course execution</h2>
     <div v-if="teacherDashboard != null" class="stats-container">
       <div class="items">
-        <div ref="numStudents" class="icon-wrapper">
+        <div ref="numStudents" class="icon-wrapper" data-cy="numStudents">
           <animated-number
             :number="teacherDashboard.studentStats[0].numStudents"
           />
@@ -13,7 +13,7 @@
         </div>
       </div>
       <div class="items">
-        <div ref="numMore75CorrectQuestions" class="icon-wrapper">
+        <div ref="numMore75CorrectQuestions" class="icon-wrapper" data-cy="numMore75CorrectQuestions">
           <animated-number
             :number="teacherDashboard.studentStats[0].numMore75CorrectQuestions"
           />
@@ -23,7 +23,7 @@
         </div>
       </div>
       <div class="items">
-        <div ref="numAtLeast3Quizzes" class="icon-wrapper">
+        <div ref="numAtLeast3Quizzes" class="icon-wrapper" data-cy="numAtLeast3Quizzes">
           <animated-number
             :number="teacherDashboard.studentStats[0].numAtLeast3Quizzes"
           />
@@ -33,7 +33,7 @@
         </div>
       </div>
       <div class="items">
-        <div ref="numQuizzes" class="icon-wrapper">
+        <div ref="numQuizzes" class="icon-wrapper" data-cy="numQuizzes">
           <animated-number :number="teacherDashboard.quizStats[0].numQuizzes" />
         </div>
         <div class="project-name">
@@ -41,7 +41,7 @@
         </div>
       </div>
       <div class="items">
-        <div ref="numUniqueAnsweredQuizzes" class="icon-wrapper">
+        <div ref="numUniqueAnsweredQuizzes" class="icon-wrapper" data-cy="numUniqueAnsweredQuizzes">
           <animated-number
             :number="teacherDashboard.quizStats[0].numUniqueAnsweredQuizzes"
           />
@@ -51,7 +51,7 @@
         </div>
       </div>
       <div class="items">
-        <div ref="averageQuizzesSolved" class="icon-wrapper">
+        <div ref="averageQuizzesSolved" class="icon-wrapper" data-cy="averageQuizzesSolved">
           <animated-number
             :number="teacherDashboard.quizStats[0].averageQuizzesSolved"
           />
@@ -61,9 +61,9 @@
         </div>
       </div>
       <div class="items">
-        <div ref="numAvailable" class="icon-wrapper">
+        <div ref="numAvailable" class="icon-wrapper" data-cy="numAvaible">
           <animated-number
-            :number="teacherDashboard.questionStats[0].numAvaible"
+            :number="teacherDashboard.questionStats[0].numAvailable"
           />
         </div>
         <div class="project-name">
@@ -71,7 +71,7 @@
         </div>
       </div>
       <div class="items">
-        <div ref="answeredQuestionsUnique" class="icon-wrapper">
+        <div ref="answeredQuestionsUnique" class="icon-wrapper" data-cy="answeredQuestionsUnique">
           <animated-number
             :number="teacherDashboard.questionStats[0].answeredQuestionsUnique"
           />
@@ -81,7 +81,7 @@
         </div>
       </div>
       <div class="items">
-        <div ref="averageQuestionsAnswered" class="icon-wrapper">
+        <div ref="averageQuestionsAnswered" class="icon-wrapper" data-cy="averageQuestionsAnswered">
           <animated-number
             :number="teacherDashboard.questionStats[0].averageQuestionsAnswered"
           />
@@ -96,7 +96,8 @@
     <h2> Comparison with previous course executions </h2>
     <div class = "stats-container">
       <div v-if="teacherDashboard != null" class="bar-chart">
-      <bar-chart
+      <bar-chart 
+        data-cy="studentStatsGraph"
         :chartData="{
           labels : teacherDashboard.studentStats.map(
             (x) => x.courseExecutionYear),
@@ -135,6 +136,7 @@
 
     <div v-if="teacherDashboard != null" class="bar-chart">
       <bar-chart
+        data-cy="quizStatsGraph"
         :chartData="{
           labels : teacherDashboard.quizStats.map(
             (x) => x.courseExecutionYear),
@@ -173,6 +175,7 @@
 
     <div v-if="teacherDashboard != null" class="bar-chart">
       <bar-chart
+        data-cy="questionStatsGraph"
         :chartData="{
           labels : teacherDashboard.questionStats.map(
             (x) => x.courseExecutionYear),
@@ -180,7 +183,7 @@
         datasets: [
           {
             label: 'Questions: Total Available',
-            data: teacherDashboard.questionStats.map((x) => x.numAvaible),
+            data: teacherDashboard.questionStats.map((x) => x.numAvailable),
             backgroundColor: 'rgba(255, 99, 132, 0.2)',
             borderColor: 'rgba(255, 99, 132, 1)',
             borderWidth: 1,

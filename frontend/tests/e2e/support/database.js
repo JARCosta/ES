@@ -248,32 +248,83 @@ Cypress.Commands.add('updateStudentStatsInDashboard', (academic_term, num_studen
 })
 
 
+Cypress.Commands.add('createCourseExecutionOnDemoCourse', (academicTerm) => {
+  cy.task('queryDatabase', {
+    query: `INSERT into course_executions (id, academic_term, acronym, end_date, status, type, course_id)
+            SELECT id+1, '${academicTerm}', acronym, end_date, status, type, course_id FROM course_executions
+              WHERE acronym = 'DemoCourse'
+              AND id=(
+                SELECT max(id) FROM course_executions
+              )`,
+    credentials: credentials,
+  });
+});
+
+Cypress.Commands.add(
+  'changeDemoTeacherCourseExecutionMatchingAcademicTerm',
+  (academicTerm) => {
+    cy.task('queryDatabase', {
+      query: `UPDATE users_course_executions
+              SET course_executions_id=(SELECT id from course_executions WHERE academic_term = '${academicTerm}')
+              WHERE users_id=(SELECT id FROM users WHERE name='Demo Teacher')`,
+      credentials: credentials,
+    });
+  }
+);
+
 Cypress.Commands.add('createStudentStats', () => {
   dbCommand(`
-            UPDATE student_stats 
-            SET num_at_least3quizzes = 13, 
-            num_more75correct_questions = 13,
-            num_students = 13,
-            WHERE id IN (1, 2, 3, 4, 5);
+              INSERT INTO student_stats (id, num_at_least3quizzes, num_more75correct_questions, num_students, course_execution_id, teacher_dashboard_id)
+              VALUES (1, 13, 13, 13, 1, 1);
+              INSERT INTO student_stats (id, num_at_least3quizzes, num_more75correct_questions, num_students, course_execution_id, teacher_dashboard_id)
+              VALUES (2, 13, 13, 13, 2, 1);
+              INSERT INTO student_stats (id, num_at_least3quizzes, num_more75correct_questions, num_students, course_execution_id, teacher_dashboard_id)
+              VALUES (3, 13, 13, 13, 3, 1);
           `);
 });
   
 Cypress.Commands.add('createQuizStats', () => {
   dbCommand(`
-            UPDATE quiz_stats 
-            SET average_quizzes_solved = 13, 
-            num_quizzes = 13,
-            num_unique_answered_quizzes = 13,
-            WHERE id IN (1, 2, 3, 4, 5);
-          `);
-});
-  
+              INSERT INTO quiz_stats (id, average_quizzes_solved, num_quizzes, num_unique_answered_quizzes, course_execution_id, teacher_dashboard_id)
+              VALUES (1, 13, 13, 13, 1, 1);
+              INSERT INTO quiz_stats (id, average_quizzes_solved, num_quizzes, num_unique_answered_quizzes, course_execution_id, teacher_dashboard_id)
+              VALUES (2, 13, 13, 13, 2, 1);
+              INSERT INTO quiz_stats (id, average_quizzes_solved, num_quizzes, num_unique_answered_quizzes, course_execution_id, teacher_dashboard_id)
+              VALUES (3, 13, 13, 13, 3, 1);
+              
+              INSERT INTO teacher_dashboard_quiz_stats (teacher_dashboard_id, quiz_stats_id)
+              VALUES (1, 1);
+              INSERT INTO teacher_dashboard_quiz_stats (teacher_dashboard_id, quiz_stats_id)
+              VALUES (1, 2);
+              INSERT INTO teacher_dashboard_quiz_stats (teacher_dashboard_id, quiz_stats_id)
+              VALUES (1, 3);
+              `);
+            });
+            
 Cypress.Commands.add('createQuestionStats', () => {
   dbCommand(`
-            UPDATE quiz_stats 
-            SET answered_questions_unique = 13, 
-            average_questions_answered = 13,
-            num_available = 13,
-            WHERE id IN (1, 2, 3, 4, 5);
-          `);
+              INSERT INTO question_stats (id, answered_questions_unique, average_questions_answered, num_available, dashboard_id, execution_id) 
+              VALUES (1, 13, 13, 13, 1, 1);
+              INSERT INTO question_stats (id, answered_questions_unique, average_questions_answered, num_available, dashboard_id, execution_id) 
+              VALUES (2, 13, 13, 13, 1, 2);
+              INSERT INTO question_stats (id, answered_questions_unique, average_questions_answered, num_available, dashboard_id, execution_id) 
+              VALUES (3, 13, 13, 13, 1, 3);
+
+              INSERT INTO teacher_dashboard_question_stats (teacher_dashboard_id, question_stats_id)
+              VALUES (1, 1);
+              INSERT INTO teacher_dashboard_question_stats (teacher_dashboard_id, question_stats_id)
+              VALUES (1, 2);
+              INSERT INTO teacher_dashboard_question_stats (teacher_dashboard_id, question_stats_id)
+              VALUES (1, 3); 
+  `);
+});
+
+Cypress.Commands.add('cleanDb' , () => {
+  dbCommand(`
+              DELETE FROM teacher_dashboard_question_stats;
+              DELETE FROM teacher_dashboard_quiz_stats;
+              DELETE FROM student_stats;
+              DELETE FROM quiz_stats;
+              DELETE FROM question_stats;
+  `);
 });

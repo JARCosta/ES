@@ -1,159 +1,266 @@
-describe('Dashboard', () => {
-  let date;
+function dbPasswordCommand(password) {
+  if (Cypress.platform === 'win32') {
+    return `set PGPASSWORD=${password}&& `;
+  } else {
+    return `PGPASSWORD=${password} `;
+  }
+}
 
-  beforeEach(() => {
-    cy.deleteQuestionsAndAnswers();
+function dbCommand(command) {
+  return cy.exec(
+    dbPasswordCommand(Cypress.env('psql_db_password')) +
+      `psql -d ${Cypress.env('psql_db_name')} ` +
+      `-U ${Cypress.env('psql_db_username')} ` +
+      `-h ${Cypress.env('psql_db_host')} ` +
+      `-p ${Cypress.env('psql_db_port')} ` +
+      `-c "${command.replace(/\r?\n/g, ' ')}"`
+  );
+}
 
-    cy.request('http://localhost:8080/auth/demo/teacher')
-      .as('loginResponse')
-      .then((response) => {
-        Cypress.env('token', response.body.token);
-        return response;
-      });
+Cypress.Commands.add('beforeEachTournament', () => {
+  dbCommand(`
+      WITH tmpCourse as (SELECT ce.course_id, ce.id as course_execution_id FROM courses c JOIN course_executions ce on ce.course_id = c.id WHERE name = 'Demo Course')      
+        ,insert1 as (INSERT INTO assessments (id, sequence, status, title, course_execution_id) VALUES (1, 0, 'AVAILABLE', 'test1', (select course_execution_id from tmpCourse)))
+        ,insert2 as (INSERT INTO assessments (id, sequence, status, title, course_execution_id) VALUES (2, 0, 'AVAILABLE', 'test2', (select course_execution_id from tmpCourse)))
+        ,insert3 as (INSERT INTO topic_conjunctions (id, assessment_id) VALUES (100, 1))
+        ,insert4 as (INSERT INTO topic_conjunctions (id, assessment_id) VALUES (101, 2))
+        ,insert5 as (INSERT INTO topics (id, name, course_id) VALUES (82, 'Software Architecture', (select course_id from tmpCourse)))
+        ,insert6 as (INSERT INTO topics (id, name, course_id) VALUES (83, 'Web Application', (select course_id from tmpCourse)))
+        ,insert7 as (INSERT INTO topics_topic_conjunctions (topics_id, topic_conjunctions_id) VALUES (82, 100))
+        ,insert8 as (INSERT INTO topics_topic_conjunctions (topics_id, topic_conjunctions_id) VALUES (83, 101))
+        ,insert9 as (INSERT INTO questions (id, title, content, status, course_id, creation_date) VALUES (1389, 'test', 'Question?', 'AVAILABLE', (select course_id from tmpCourse), current_timestamp))
+        ,insert10 as (INSERT INTO question_details (id, question_type, question_id) VALUES (1000, 'multiple_choice', 1389))
+        INSERT INTO topics_questions (topics_id, questions_id) VALUES (82, 1389);
+    `);
 
-    date = new Date();
-    //create quiz
-    cy.demoTeacherLogin();
+  for (let content in [0, 1, 2, 3]) {
+    let correct = content === '0' ? 't' : 'f';
+    dbCommand(`
+      INSERT INTO options(content, correct, question_details_id, sequence) VALUES ('${content}', '${correct}', 1000, ${content});
+      `);
+  }
+});
 
-    cy.addTopicAndAssessment();
+Cypress.Commands.add('cleanTestTopics', () => {
+  dbCommand(`
+        DELETE FROM topics
+        WHERE name like 'CY%'
+    `);
+});
 
-    cy.createQuestion(
-      'Dashboard Question 1 ' + date,
-      'Question',
-      'Option',
-      'Option',
-      'ChooseThisWrong',
-      'Correct'
+Cypress.Commands.add('cleanTestCourses', () => {
+  dbCommand(`
+    delete from users_course_executions where course_executions_id in (select id from course_executions where acronym like 'TEST-%');
+    delete from course_executions where acronym like 'TEST-%';
+    `);
+});
+
+Cypress.Commands.add('updateTournamentStartTime', () => {
+  dbCommand(`
+        UPDATE tournaments SET start_time = '2020-07-16 07:57:00';
+    `);
+});
+
+Cypress.Commands.add('afterEachTournament', () => {
+  dbCommand(`
+         DELETE FROM tournaments_topics WHERE topics_id = 82;
+         DELETE FROM tournaments_topics WHERE topics_id = 83;
+         DELETE FROM topics_topic_conjunctions WHERE topics_id = 82;
+         DELETE FROM topics_topic_conjunctions WHERE topics_id = 83;
+         DELETE FROM topic_conjunctions WHERE id = 100;
+         DELETE FROM topic_conjunctions WHERE id = 101;
+         DELETE FROM assessments WHERE id = 1;
+         DELETE FROM assessments WHERE id = 2;
+         DELETE FROM topics_questions WHERE questions_id = 1389;
+         DELETE FROM topics WHERE id = 82;
+         DELETE FROM topics WHERE id = 83;
+         DELETE FROM question_answers USING quiz_questions WHERE quiz_questions.id = question_answers.quiz_question_id AND quiz_questions.question_id = 1389;
+         DELETE FROM quiz_questions WHERE question_id = 1389;
+         DELETE FROM options WHERE question_details_id = 1000;
+         DELETE FROM question_details WHERE id = 1000;
+         DELETE FROM questions WHERE id = 1389;
+         DELETE FROM tournaments_participants;
+         DELETE FROM tournaments; 
+         ALTER SEQUENCE tournaments_id_seq RESTART WITH 1;
+         UPDATE tournaments SET id=nextval('tournaments_id_seq');
+    `);
+});
+
+Cypress.Commands.add('addQuestionSubmission', (title, submissionStatus) => {
+  dbCommand(`
+    WITH course as (SELECT ce.course_id as course_id, ce.id as course_execution_id FROM courses c JOIN course_executions ce on ce.course_id = c.id WHERE name = 'Demo Course')     
+    , quest AS (
+      INSERT INTO questions (title, content, status, course_id, creation_date) 
+      VALUES ('${title}', 'Question?', 'SUBMITTED', (select course_id from course), current_timestamp) RETURNING id
+      )
+    INSERT INTO question_submissions (status, question_id, submitter_id, course_execution_id) 
+    VALUES ('${submissionStatus}', (SELECT id from quest), (select id from users where name = 'Demo Student'), (select course_execution_id from course));`);
+
+  //add options
+  for (let content in [0, 1, 2, 3]) {
+    let correct = content === '0' ? 't' : 'f';
+    dbCommand(
+      `WITH quest AS (SELECT id FROM questions WHERE title='${title}' limit 1),
+      quest_details as (INSERT INTO question_details (question_type, question_id) VALUES ('multiple_choice', (SELECT id FROM quest)) RETURNING id)
+      INSERT INTO options(content, correct, question_details_id, sequence) 
+      VALUES ('${content}', '${correct}', (SELECT id FROM quest_details), ${content});`
     );
+  }
+});
 
-    cy.get('[data-cy="Topics"]').click();
-    cy.contains('Software Architecture').click();
+Cypress.Commands.add('removeQuestionSubmission', (hasReviews = false) => {
+  if (hasReviews) {
+    dbCommand(`WITH rev AS (DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews) RETURNING question_submission_id)
+                      , sub AS (DELETE FROM question_submissions WHERE id IN (SELECT * FROM rev) RETURNING question_id) 
+                      , opt AS (DELETE FROM options WHERE question_details_id IN (SELECT qd.id FROM sub JOIN question_details qd on qd.question_id = sub.question_id)) 
+                      , det AS (DELETE FROM question_details WHERE question_id in (SELECT * FROM sub))
+                        DELETE FROM questions WHERE id IN (SELECT * FROM sub);`);
+  } else {
+    dbCommand(`WITH sub AS (DELETE FROM question_submissions WHERE id IN (SELECT max(id) FROM question_submissions) RETURNING question_id)
+                      , opt AS (DELETE FROM options WHERE question_details_id IN (SELECT qd.id FROM sub JOIN question_details qd on qd.question_id = sub.question_id)) 
+                      , det AS (DELETE FROM question_details WHERE question_id in (SELECT * FROM sub))
+                    DELETE FROM questions WHERE id IN (SELECT * FROM sub);`);
+  }
+});
 
-    cy.createQuestion(
-      'Dashboard Question 2 ' + date,
-      'Question',
-      'Option',
-      'Option',
-      'ChooseThisWrong',
-      'Correct'
-    );
+Cypress.Commands.add('cleanMultipleChoiceQuestionsByName', (questionName) => {
+  dbCommand(`WITH toDelete AS (SELECT qt.id as question_id FROM questions qt JOIN question_details qd ON qd.question_id = qt.id and qd.question_type='multiple_choice' where title like '%${questionName}%')
+                  , opt AS (DELETE FROM options WHERE question_details_id IN (SELECT qd.id FROM toDelete JOIN question_details qd on qd.question_id = toDelete.question_id)) 
+                  , det AS (DELETE FROM question_details WHERE question_id in (SELECT question_id FROM toDelete))
+                DELETE FROM questions WHERE id IN (SELECT question_id FROM toDelete);`);
+});
 
-    cy.createQuizzWith2Questions(
-      'Dashboard Title ' + date,
-      'Dashboard Question 1 ' + date,
-      'Dashboard Question 2 ' + date
-    );
-    cy.contains('Logout').click();
-  });
+Cypress.Commands.add('cleanCodeFillInQuestionsByName', (questionName) => {
+  dbCommand(`WITH toDelete AS (SELECT qt.id as question_id FROM questions qt JOIN question_details qd ON qd.question_id = qt.id and qd.question_type='code_fill_in' where title like '%${questionName}%')
+                , fillToDelete AS (SELECT id FROM  code_fill_in_spot WHERE question_details_id IN (SELECT qd.id FROM toDelete JOIN question_details qd on qd.question_id = toDelete.question_id))
+                , opt AS (DELETE FROM  code_fill_in_options WHERE code_fill_in_id IN (SELECT id FROM fillToDelete))
+                , fill AS (DELETE FROM  code_fill_in_spot WHERE id IN (SELECT id FROM fillToDelete)) 
+                , det AS (DELETE FROM question_details WHERE question_id in (SELECT question_id FROM toDelete))
+              DELETE FROM questions WHERE id IN (SELECT question_id FROM toDelete);`);
+});
 
-  afterEach(() => {
-    cy.deleteWeeklyScores();
-    cy.deleteFailedAnswers();
-    cy.deleteDifficultQuestions();
-    cy.deleteQuestionsAndAnswers();
-  });
+Cypress.Commands.add('createWeeklyScore', () => {
+  dbCommand(`WITH courseExecutionId as (SELECT ce.id as course_execution_id FROM course_executions ce WHERE acronym = 'DemoCourse')
+        , demoStudentId as (SELECT u.id as users_id FROM users u WHERE name = 'Demo Student')
+        , dashboardId as (SELECT d.id as student_dashboard_id FROM student_dashboard d WHERE student_id = (select users_id from demoStudentId) AND course_execution_id = (select course_execution_id from courseExecutionId))
+       INSERT INTO weekly_score(closed, quizzes_answered, questions_answered, questions_uniquely_answered, percentage_correct, improved_correct_answers, week, student_dashboard_id) VALUES (true, 3, 10, 50, 9, 8, '2022-02-02', (select student_dashboard_id from dashboardId))
+      `);
+});
 
-  it('student accesses dashboard', () => {
-    cy.intercept('GET', '**/students/dashboards/executions/*').as(
-      'getDashboard'
-    );
-    cy.intercept('PUT', '**/students/dashboards/*/weeklyscores').as(
-      'updateWeeklyScores'
-    );
-    cy.intercept('PUT', '**/students/dashboards/*/failedanswers').as(
-      'updateFailedAnswers'
-    );
-    cy.intercept('DELETE', '**/students/failedanswers/*').as(
-      'deleteFailedAnswer'
-    );
-    cy.intercept('PUT', '**/students/dashboards/*/difficultquestions').as(
-      'updateDifficultQuestions'
-    );
-    cy.intercept('DELETE', '**/students/difficultquestions/*').as(
-      'deleteDifficultQuestion'
-    );
+Cypress.Commands.add('deleteWeeklyScores', () => {
+  dbCommand(`
+         UPDATE student_dashboard SET last_check_weekly_scores = NULL;
+         DELETE FROM weekly_score;
+    `);
+});
 
-    cy.demoStudentLogin();
-    cy.solveQuizz('Dashboard Title ' + date, 2, 'ChooseThisWrong');
+Cypress.Commands.add('deleteFailedAnswers', () => {
+  dbCommand(`
+         UPDATE student_dashboard SET last_check_failed_answers = NULL;
+         DELETE FROM failed_answer;
+    `);
+});
 
-    // weekly scores
+Cypress.Commands.add('addTopicAndAssessment', () => {
+  dbCommand(`
+      WITH tmpCourse as (SELECT ce.course_id, ce.id as course_execution_id FROM courses c JOIN course_executions ce on ce.course_id = c.id WHERE name = 'Demo Course')      
+        ,insert1 as (INSERT INTO assessments (id, sequence, status, title, course_execution_id) VALUES (1, 0, 'AVAILABLE', 'assessment one', (select course_execution_id from tmpCourse)))
+        ,insert2 as (INSERT INTO topic_conjunctions (id, assessment_id) VALUES (100, 1))
+        ,insert3 as (INSERT INTO topics (id, name, course_id) VALUES (82, 'Software Architecture', (select course_id from tmpCourse)))
+        INSERT INTO topics_topic_conjunctions (topics_id, topic_conjunctions_id) VALUES (82, 100);
+    `);
+});
 
-    cy.get('[data-cy="dashboardMenuButton"]').click();
-    cy.wait('@getDashboard');
+Cypress.Commands.add('deleteDifficultQuestions', () => {
+  dbCommand(`
+         DELETE FROM difficult_question;
+    `);
+});
 
-    cy.createWeeklyScore();
+Cypress.Commands.add('deleteQuestionsAndAnswers', () => {
+  dbCommand(`
+         DELETE FROM replies;
+         DELETE FROM discussions;
+         DELETE FROM answer_details;
+         DELETE FROM question_answers;
+         DELETE FROM quiz_answers;
+         DELETE FROM quiz_questions;
+         DELETE FROM quizzes;
+         DELETE FROM topics_topic_conjunctions;
+         DELETE FROM topic_conjunctions;
+         DELETE FROM topics_questions;
+         DELETE FROM assessments;
+         DELETE FROM options;
+         DELETE FROM question_details;
+         DELETE FROM questions;
+         DELETE FROM topics;
+    `);
+});
 
-    cy.get('[data-cy="weeklyScoresMenuButton"]').click();
-    cy.wait('@updateWeeklyScores');
+const credentials = {
+  user: Cypress.env('psql_db_username'),
+  host: Cypress.env('psql_db_host'),
+  database: Cypress.env('psql_db_name'),
+  password: Cypress.env('psql_db_password'),
+  port: Cypress.env('psql_db_port'),
+};
 
-    cy.get('table tbody tr').should('have.length', 2);
-
-    cy.get('[data-cy="failedAnswersMenuButton"]').click();
-    cy.wait('@updateFailedAnswers');
-
-    cy.get('[data-cy="showStudentViewDialog"]')
-      .should('have.length', 2)
-      .eq(0)
-      .click();
-
-    cy.get('[data-cy="closeButton"]').click();
-
-    cy.get('[data-cy="deleteFailedAnswerButton"]')
-      .should('have.length', 2)
-      .eq(0)
-      .click();
-    cy.wait('@deleteFailedAnswer');
-
-    cy.get('[data-cy="deleteFailedAnswerButton"]')
-      .should('have.length', 1)
-      .eq(0)
-      .click();
-    cy.wait('@deleteFailedAnswer');
-
-    cy.get('[data-cy="deleteFailedAnswerButton"]').should('have.length', 0);
-
-    // difficult  questions
-
-    cy.getDemoCourseExecutionId().then((result) => {
-      cy.request({
-        method: 'PUT',
-        url:
-          'http://localhost:8080/executions/' +
-          result[0].id +
-          '/difficultquestions',
-        headers: {
-          Authorization: 'Bearer ' + Cypress.env('token'),
-        },
-      });
-    });
-
-    cy.get('[data-cy="difficultQuestionsMenuButton"]').click();
-    cy.wait('@updateDifficultQuestions');
-
-    cy.get('[data-cy="showStudentViewDialog"]')
-      .should('have.length.at.least', 1)
-      .eq(0)
-      .click({ force: true });
-
-    cy.get('[data-cy="closeButton"]').click();
-
-    cy.get('[data-cy="deleteDifficultQuestionButton"]')
-      .should('have.length', 1)
-      .eq(0)
-      .click();
-    cy.wait('@deleteDifficultQuestion');
-
-    cy.get('[data-cy="deleteDifficultQuestionButton"]').should(
-      'have.length',
-      0
-    );
-
-    cy.contains('Logout').click();
-
-    Cypress.on('uncaught:exception', (err, runnable) => {
-      // returning false here prevents Cypress from
-      // failing the test
-      return false;
-    });
+Cypress.Commands.add('getDemoCourseExecutionId', () => {
+  cy.task('queryDatabase', {
+    query: "SELECT id FROM course_executions WHERE acronym = 'DemoCourse'",
+    credentials: credentials,
   });
 });
+
+Cypress.Commands.add('updateStudentsStat', (numStudents, numMore75CorrectQuestions, numAtLeast3Quizzes, course_year) => {
+
+  dbCommand(`
+  
+  UPDATE student_stats;
+  SET numStudents =${numStudents}, numMore75CorrectQuestions =${numMore75CorrectQuestions}, numAtLeast3Quizzes =${numAtLeast3Quizzes};
+  WHERE course_execution_id IN (SELECT id FROM course_executions);
+  FROM course_executions WHERE academic_term =${course_year};
+`);
+  
+Cypress.Commands.add('createCourseExecutionDB', (academicTerm) => {
+  dbCommand(`
+  INSERT into course_executions (id, academic_term, acronym, end_date, status, type, course_id)
+  SELECT id+1, '${academicTerm}', CONCAT('DemoCourse', '${academicTerm}'), end_date, status, type, course_id
+  FROM course_executions
+  WHERE acronym LIKE 'DemoCourse%'
+  AND id=(SELECT max(id) FROM course_executions);
+  
+  INSERT INTO users_course_executions (users_id, course_executions_id)
+  SELECT u.id, ce.id
+  FROM users u, course_executions ce
+  WHERE u.name = 'Demo Teacher'
+  AND ce.academic_term = '${academicTerm}';
+  `);
+})
+
+Cypress.Commands.add('deleteCourseExecutionDB', (academicTerm) => {
+  dbCommand(`
+      DELETE FROM teacher_dashboard_question_stats;
+      DELETE FROM question_stats;
+      DELETE FROM teacher_dashboard_quiz_stats;
+      DELETE FROM quiz_stats ;
+      DELETE FROM teacher_dashboard_student_stats;
+      DELETE FROM student_stats;
+      DELETE FROM teacher_dashboard;
+      DELETE FROM users_course_executions WHERE course_executions_id IN 
+                (SELECT id AS course_executions_id FROM course_executions WHERE academic_term = '${academicTerm}');
+      DELETE FROM course_executions WHERE academic_term = '${academicTerm}'
+      `);
+})
+
+Cypress.Commands.add('updateStudentStatsInDashboard', (academicTerm, ns, ncq, nlq) => {
+  dbCommand(`
+        UPDATE student_stats
+        SET num_students = ${ns}, num_more75correct_questions = ${ncq}, num_at_least3quizzes = ${nlq}
+        WHERE course_execution_id IN (SELECT id FROM course_executions WHERE academic_term = '${academicTerm}');
+    `);
+})
+
+}
+
+)

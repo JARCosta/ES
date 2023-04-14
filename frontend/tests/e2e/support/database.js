@@ -283,6 +283,17 @@ Cypress.Commands.add('createQuestionStats', () => {
   `);
 });
 
+Cypress.Commands.add('createTeacherDashboard', () => {
+  dbCommand(`
+              INSERT INTO teacher_dashboard (id, course_execution_id, teacher_id)
+              VALUES (1, 1, 1);
+              INSERT INTO teacher_dashboard (id, course_execution_id, teacher_id)
+              VALUES (2, 2, 1);
+              INSERT INTO teacher_dashboard (id, course_execution_id, teacher_id)
+              VALUES (3, 3, 1);
+            `);
+});
+
 Cypress.Commands.add('cleanDb' , () => {
   dbCommand(`
               DELETE FROM teacher_dashboard_question_stats;
